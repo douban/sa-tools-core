@@ -1,0 +1,15 @@
+# Python
+*.py[cod]
+
+# Editor
+*.sw[op]
+
+# Project
+local_config.py
+/tmp
+/venv
+*.egg-info
+
+# Test
+/dist
+/build
