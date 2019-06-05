@@ -12,7 +12,11 @@ class Client(Process):
         self.func = func
 
     def __str__(self):
-        return '%s(cmds=%s, func=%s:%s)' % (self.__class__.__name__, self.cmds, self.func.__module__, self.func.__name__)
+        if self.func:
+            func_str = '%s:%s' % (self.func.__module__, self.func.__name__)
+        else:
+            func_str = 'None'
+        return '%s(cmds=%s, func=%s)' % (self.__class__.__name__, self.cmds, func_str)
 
     __repr__ = __str__
 
