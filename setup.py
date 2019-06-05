@@ -31,7 +31,7 @@ entry_points = """
 scripts = [
 ]
 
-setup(name='sa-tools',
+setup(name='sa-tools-core',
       version=version,
       description="SA Tools Core",
       long_description=open("README.md").read(),

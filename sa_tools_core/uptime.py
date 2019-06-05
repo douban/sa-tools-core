@@ -1,6 +1,5 @@
 # coding: utf-8
 
-import sys
 import logging
 from argparse import ArgumentParser
 
@@ -18,15 +17,15 @@ def uptime(args):
     print(process.uptime()['stdout'])
 
 
-def main():
+def main(args=None):
     parser = ArgumentParser()
     parser.add_argument('-u', '--user', help='LDAP username')
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     args.user = args.user or get_os_username()
 
     logging.basicConfig(level=logging.WARNING,
                         format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
-    sys.exit(uptime(args))
+    uptime(args)

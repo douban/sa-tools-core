@@ -86,7 +86,7 @@ def notify(args):
                 logger.exception('Notifier.%s(%s) failed: %s', type_, addrs, e)
 
 
-def main():
+def main(args=None):
     """
     e.g.
     $ sa-notify --wechat user1 --content 'xxx'
@@ -102,7 +102,7 @@ def main():
         parser.add_argument('--%s' % type_, nargs='*',
                             help='your enterprise address of %s.' % type_)
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     args.user = args.user or get_os_username()
 
     logging.basicConfig(level=logging.INFO,
@@ -115,4 +115,4 @@ def main():
         if not args.content:
             parser.error("content empty")
 
-    sys.exit(notify(args))
+    notify(args)
