@@ -1,0 +1,41 @@
+# coding: utf-8
+
+import shlex
+import importlib
+
+from sa_tools_core.libs.process import Process
+
+
+class Client(Process):
+    def __init__(self, cmds=None, func=None):
+        super(Client, self).__init__(cmds)
+        self.func = func
+
+    def __str__(self):
+        return '%s(cmds=%s, func=%s:%s)' % (self.__class__.__name__, self.cmds, self.func.__module__, self.func.__name__)
+
+    __repr__ = __str__
+
+    def __getattr__(self, name):
+        if not self.func:
+            mod = importlib.import_module('sa_tools_core.%s' % name)
+            return self.__class__(func=mod.main)
+
+        return super(Client, self).__getattr__(name)
+
+    def bake(self, *a, **kw):
+        cmds = list(self.cmds)
+        proc = Client(cmds, self.func)
+        proc._parse_args(*a, **kw)
+        return proc
+
+    def call(self, cmdstr='', env=None):
+        extra_cmds = shlex.split(cmdstr)
+        return self.func(self.cmds + extra_cmds)
+
+
+if __name__ == '__main__':
+    c = Client()
+    print(c.notify(wework='lihan', content='hehe'))
+    print(c.uptime())
+    print(c.notify.test)
