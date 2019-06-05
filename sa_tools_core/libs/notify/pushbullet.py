@@ -2,9 +2,9 @@
 
 import json
 import base64
-import urllib
-import urllib2
 import logging
+from six.moves.urllib.parse import urlencode
+from six.moves.urllib.request import urlopen, Request
 
 from sa_tools_core.utils import get_config
 
@@ -22,12 +22,12 @@ def send_message(email, title, body):
         "title": title,
         "body": body,
     }
-    payload = urllib.urlencode(data)
-    req = urllib2.Request(PUSH_URL)
+    payload = urlencode(data)
+    req = Request(PUSH_URL)
     base64string = base64.encodestring('%s:%s' % (PUSH_KEY, ''))[:-1]
     authheader = "Basic %s" % base64string
     req.add_header("Authorization", authheader)
 
-    resp = json.loads(urllib2.urlopen(req, payload).read())
+    resp = json.loads(urlopen(req, payload).read())
     if not resp['receiver_email'] == email:
         raise Exception('api failed, resp: %s' % resp)

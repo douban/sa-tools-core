@@ -8,7 +8,7 @@ version = '0.1.0'
 requirements = [
     'setuptools',
     'six',
-    'wechat',
+    'wechat @ git+https://github.com/tclh123/wechat.git@py3k#egg=wechat-0.4.17'
     'pycrypto',
 ]
 

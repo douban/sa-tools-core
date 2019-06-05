@@ -34,7 +34,7 @@ class Notifier(object):
 
             def _func(*a, **kw):
                 addrs = kw.get('addrs') or a[0]
-                addrs = filter(None, addrs)
+                addrs = [addr for addr in addrs if addr]
                 if not addrs:
                     logger.warning('notify abort, ignoring empty addrs')
                     return
@@ -83,7 +83,7 @@ def notify(args):
             try:
                 getattr(notifier, type_)(addrs)
             except Exception as e:
-                logger.error('Notifier.%s(%s) failed: %s', type_, addrs, e)
+                logger.exception('Notifier.%s(%s) failed: %s', type_, addrs, e)
 
 
 def main():
