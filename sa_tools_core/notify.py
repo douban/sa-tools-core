@@ -53,8 +53,8 @@ class Notifier(object):
     def _wework(self, addrs, content=None, **kw):
         send_wechat('|'.join(addrs), content, qy=True)
 
-    def _email(self, addrs, content=None, title=None, **kw):
-        send_mail(addrs, content, subject=title, from_addr=self.from_addr)
+    def _email(self, addrs, content=None, title=None, from_addr=None, **kw):
+        send_mail(addrs, content, subject=title, from_addr=from_addr or self.from_addr)
 
     def _pushbullet(self, addrs, content=None, title=None, **kw):
         for addr in addrs:
@@ -81,7 +81,7 @@ def notify(args):
         if values:
             addrs = [i for v in values for i in re.split(r'[,\s]+', v)]
             try:
-                getattr(notifier, type_)(addrs)
+                getattr(notifier, type_)(addrs, from_addr=args.from_addr)
             except Exception as e:
                 logger.exception('Notifier.%s(%s) failed: %s', type_, addrs, e)
 
@@ -98,6 +98,7 @@ def main(args=None):
     parser.add_argument('-c', '--content', help='content.')
     parser.add_argument('-s', '--subject', help='subject. default="%(default)s"',
                         default=DEFAULT_TITLE)
+    parser.add_argument('-f', '--from-addr', help='From address, currently only works for email.')
     for type_ in NOTIFY_TYPES:
         parser.add_argument('--%s' % type_, nargs='*',
                             help='your enterprise address of %s.' % type_)
