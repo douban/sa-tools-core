@@ -1,16 +1,20 @@
-# SA Tools Open
+# SA Tools Core
 
 
 ## Development guide
 
 Currently support python2.7
 
+### quick start
+
 ```
-virtualenv venv
-. venv/bin/activate
-pip install --upgrade pip
-pip install --upgrade setuptools
-pip install -e . --process-dependency-links
+make init
+```
+
+### re-install after modify codes
+
+```
+make install
 ```
 
 ## Usage
@@ -93,3 +97,5 @@ $ sa-icinga show --filter 'service.name == "check-puppet"' --attrs acknowledgeme
 ```
 
 ### sa-notify
+
+TODO
