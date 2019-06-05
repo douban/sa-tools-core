@@ -7,6 +7,7 @@ version = '0.1.0'
 
 requirements = [
     'setuptools',
+    'six',
     'wechat',
     'pycrypto',
 ]

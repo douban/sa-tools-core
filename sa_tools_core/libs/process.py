@@ -33,6 +33,7 @@ adduser("amoffat", system=True, shell="/bin/bash", no_create_home=True)
 adduser("amoffat", "--system", "--shell", "/bin/bash", "--no-create-home")
 """
 
+import six
 import shlex
 import logging
 import subprocess
@@ -40,22 +41,12 @@ import subprocess
 logger = logging.getLogger(__name__)
 
 
-# TODO: remove this?
-def _shlex_split(cmd):
-    if isinstance(cmd, unicode):
-        return [c.decode("utf-8") for c in shlex.split(cmd.encode("utf-8"))]
-    elif isinstance(cmd, str):
-        return shlex.split(cmd.encode("utf-8"))
-    elif not isinstance(cmd, list):
-        return list(cmd)
-    return cmd
-
-
 def _call(cmd, env=None):
     kw = dict(env=env) if env else {}
     try:
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                   stderr=subprocess.PIPE, **kw)
+                                   stderr=subprocess.PIPE,
+                                   universal_newlines=True, **kw)
     except (OSError, TypeError) as err:
         logger.error("Error occurrred when calling %s" % " ".join(cmd))
         raise err
@@ -89,11 +80,11 @@ class Process(object):
     def _parse_args(self, *a, **kw):
         cmds = []
         for p in a:
-            if not isinstance(p, (str, unicode)):
+            if not isinstance(p, six.string_types):
                 raise KeyError
             cmds.append(p)
 
-        for k, v in kw.iteritems():
+        for k, v in kw.items():
             if len(k) == 1:
                 k = '-' + k
             else:
@@ -104,7 +95,7 @@ class Process(object):
                 continue
             elif isinstance(v, bool):  # v is True
                 cmds.append(k)
-            elif isinstance(v, (str, unicode)):
+            elif isinstance(v, six.string_types):
                 cmds.append(k)
                 cmds.append(v)
             else:
@@ -118,7 +109,7 @@ class Process(object):
         return proc
 
     def call(self, cmdstr='', env=None):
-        extra_cmds = _shlex_split(cmdstr)
+        extra_cmds = shlex.split(cmdstr)
         return _call(self.cmds + extra_cmds, env=env)
 
 

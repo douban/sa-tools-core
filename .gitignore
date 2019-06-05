@@ -8,6 +8,7 @@
 local_config.py
 /tmp
 /venv
+/venv[23]
 *.egg-info
 
 # Test
