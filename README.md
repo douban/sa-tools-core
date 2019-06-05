@@ -3,7 +3,7 @@
 
 ## Development guide
 
-Currently support python2.7
+Currently support python2.7 ~ python3.7
 
 ### quick start
 
