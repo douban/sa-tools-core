@@ -8,14 +8,14 @@ from six.moves.urllib.request import urlopen, Request
 
 from sa_tools_core.utils import get_config
 
-PUSH_KEY = get_config('pushbullet')
-# PUSH_KEY = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'  # reply@douban.com
 PUSH_URL = 'https://api.pushbullet.com/v2/pushes'
 
 logger = logging.getLogger(__name__)
 
 
 def send_message(email, title, body):
+    PUSH_KEY = get_config('pushbullet')
+
     data = {
         "email": email,
         "type": 'note',

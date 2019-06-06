@@ -7,13 +7,14 @@ import logging
 from sa_tools_core.utils import get_config
 
 PUSHOVER_URL = 'https://api.pushover.net/1/messages.json'
-APP_TOKEN = get_config('pushover')
-# APP_TOKEN = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'  # created by xupeng on pushover.net
 
 logger = logging.getLogger(__name__)
 
 
 def send_message(user_key, message):
+    # APP_TOKEN created on pushover.net
+    APP_TOKEN = get_config('pushover')
+
     data = {
         "token": APP_TOKEN,
         "user": user_key,
