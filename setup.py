@@ -10,13 +10,14 @@ requirements = [
     'six',
     'wechat @ git+https://github.com/tclh123/wechat.git@py3k#egg=wechat-0.4.17',
     'pycrypto',
+    'pydnspod @ git+https://github.com/tclh123/pydnspod.git@v0.0.3#egg=pydnspod-0.0.3',
 ]
 
 
 entry_points = """
       [console_scripts]
       sa-uptime = sa_tools_core.uptime:main
-      # sa-dns = sa_tools_core.dns:main
+      sa-dns = sa_tools_core.dns:main
       # sa-node = sa_tools_core.node:main
       # sa-rsync = sa_tools_core.rsync:main
       # sa-script = sa_tools_core.script:main
