@@ -1,5 +1,7 @@
 # coding: utf-8
 
+from __future__ import print_function
+
 import json
 import logging
 import argparse
@@ -11,7 +13,9 @@ from sa_tools_core.libs.permission import require_sa
 from sa_tools_core.consts import (EXTERNAL_DOMAINS_CONFIG_FILE,
                                   DNS_MONITOR_CALLBACK_URL,
                                   DEFAULT_DNS_DOMAIN)
-from sa_tools_core.utils import get_os_username, get_config, ipv6_addr_to_tinydns_generic
+from sa_tools_core.utils import (get_os_username, get_config,
+                                 ipv6_addr_to_tinydns_generic,
+                                 output, to_str)
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +151,7 @@ class DNSPod(object):
         records = self.get_records(sub_domain=sub_domain)
         # NOTE: only deal with default line type records by default
         exist_records = [r for r in records
-                         if (r['line'].encode('utf-8') == line)
+                         if (to_str(r['line']) == line)
                          and (not type or r['type'] == type)
                          and (not value or r['value'].rstrip('.') == value.rstrip('.'))]
 
@@ -203,7 +207,7 @@ class DNSPod(object):
         records = self.get_records(sub_domain=sub_domain)
         # NOTE: only deal with default line type records by default
         exist_records = [r for r in records
-                         if r['line'].encode('utf-8') == line
+                         if to_str(r['line']) == line
                          and r['type'] == type
                          and r['value'].rstrip('.') == value.rstrip('.')]
 
@@ -345,7 +349,7 @@ class DNSPod(object):
         if self.verbose:
             for r in records:
                 logger.info('add_monitor({sub_domain} {line} {type} {value})'.format(
-                            sub_domain=r['name'], line=r['line'].encode('utf-8'),
+                            sub_domain=r['name'], line=to_str(r['line']),
                             type=r['type'], value=r['value']))
 
         if self.dry_run:
@@ -378,7 +382,7 @@ class DNSPod(object):
         if self.verbose:
             for m in monitors:
                 logger.info('remove_monitors({sub_domain} {line} {ip} {type} {path})'.format(
-                            sub_domain=sub_domain, line=m['record_line'].encode('utf-8'), ip=m['ip'], type=m['monitor_type'],
+                            sub_domain=sub_domain, line=to_str(m['record_line']), ip=m['ip'], type=m['monitor_type'],
                             path=m['monitor_path']))
 
         if self.dry_run:
@@ -415,15 +419,15 @@ def list_monitor(args):
         monitors = [m for m in monitors if m['monitor_status'] == 'enabled']
     if args.sub_domain:
         monitors = [m for m in monitors if m['sub_domain'] == args.sub_domain]
-    print('{:>10} {:<12} {:>15} {:>4} {:>5} {:<20} {:<5}'.format('sub_domain', 'line', 'ip', 'port', 'type', 'path',
-                                                                 'status'))
-    print('-' * 80)
+    output('{:>10} {:<12} {:>15} {:>4} {:>5} {:<20} {:<5}'.format('sub_domain', 'line', 'ip', 'port', 'type', 'path',
+                                                                  'status'))
+    output('-' * 80)
     for monitor in monitors:
-        print('{:>10} {:<12} {:>15} {:>4} {:>5} {:<20} {:<5}'.format(monitor['sub_domain'],
-                                                                     monitor['record_line'].encode('utf-8'),
-                                                                     monitor['ip'], monitor['port'], monitor['monitor_type'],
-                                                                     monitor['monitor_path'],
-                                                                     monitor['monitor_status']))
+        output('{:>10} {:<12} {:>15} {:>4} {:>5} {:<20} {:<5}'.format(monitor['sub_domain'],
+                                                                      to_str(monitor['record_line']),
+                                                                      monitor['ip'], monitor['port'], monitor['monitor_type'],
+                                                                      monitor['monitor_path'],
+                                                                      monitor['monitor_status']))
 
 
 @require_sa
@@ -458,29 +462,29 @@ def list_(args):
 
     records = dnspod.get_records(**params)
 
-    print("name", "type", "line", "value", "mx", "ttl", "status")
-    print("-" * 50)
+    output("name", "type", "line", "value", "mx", "ttl", "status")
+    output("-" * 50)
     for record in records:
-        print(record['name'], record['type'], record['line'].encode('utf-8'), record['value'],
-              (record['mx'] if int(record['mx']) else '-'), record['ttl'],
-              ('enabled' if int(record['enabled']) else 'disabled'))
+        output(record['name'], record['type'], record['line'], record['value'],
+               (record['mx'] if int(record['mx']) else '-'), record['ttl'],
+               ('enabled' if int(record['enabled']) else 'disabled'))
 
 
 @require_sa
 def show(args):
     dnspod = DNSPod(domain=args.domain)
     if args.record_line:
-        print('>>>', 'supported lines')
+        output('>>>', 'supported lines')
         for line in dnspod.get_record_lines():
-            print(line)
+            output(line)
     if args.record_type:
-        print('>>>', 'supported types')
+        output('>>>', 'supported types')
         for type_ in dnspod.get_record_types():
-            print(type_)
+            output(type_)
     if args.user_log:
-        print('>>>', 'user log')
+        output('>>>', 'user log')
         for log_line in dnspod.get_user_log():
-            print(log_line)
+            output(log_line)
 
 
 @require_sa
@@ -523,7 +527,7 @@ def dump(args):
         if not enable:
             line = '#' + line
 
-        print(line)
+        output(line)
 
 
 @require_sa
@@ -598,7 +602,9 @@ def main(args=None):
     parser.add_argument('-d', '--domain', default=DOMAIN,
                         help='Top level domain. (default: %(default)s)')
 
-    subparsers = parser.add_subparsers(help='Sub commands', required=True, dest='subparser')
+    # compatible with py2 & 3
+    subparsers = parser.add_subparsers(help='Sub commands', dest='subparser')
+    subparsers.required = True
 
     dump_parser = subparsers.add_parser('dump', help='Dump dns records.')
     dump_parser.set_defaults(func=dump)

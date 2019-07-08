@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import os
 import sys
+import six
 import pwd
 import socket
 import binascii
@@ -77,3 +78,18 @@ def ipv6_addr_to_tinydns_generic(ipv6_addr):
     for part in split_hexlify_ipv6_addr:
         rdata += '\\%03o' % int(part, 16)
     return rdata
+
+
+def to_str(s, encoding='utf-8'):
+    '''
+    in python2, convert s to str if s is unicode
+    in python3, convert s to str if s is bytes
+    '''
+    return six.ensure_str(s, encoding=encoding)
+
+
+def output(*args, **kw):
+    '''
+    try to output as UTF-8 encoding strings, to a terminal or a file
+    '''
+    print(*[to_str(a) for a in args], **kw)

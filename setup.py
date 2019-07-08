@@ -10,7 +10,7 @@ requirements = [
     'six',
     'wechat @ git+https://github.com/tclh123/wechat.git@py3k#egg=wechat-0.4.17',
     'pycrypto',
-    'pydnspod @ git+https://github.com/tclh123/pydnspod.git@v0.0.3#egg=pydnspod-0.0.3',
+    'pydnspod @ git+https://github.com/tclh123/pydnspod.git@py3k#egg=pydnspod-0.0.3',
 ]
 
 
