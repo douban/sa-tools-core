@@ -4,7 +4,13 @@ import os
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
+IPMI_TIMEOUT = 2
+IPMI_RETRIES = 1
+
+# CONFIGURATION SECTION
+
 CONFIG_DIR = '/etc/sa-tools/'
+EXTERNAL_DOMAINS_CONFIG_FILE = CONFIG_DIR + '/external_domains'
 
 NODE_IRC_CHANNEL = '#sysadmin'
 NODE_SLACK_CHANNEL = '#sa'
@@ -12,9 +18,6 @@ NODE_MAIL_TO = 'sa@example.com'
 
 SYSADMIN_EMAIL = 'sysadmin@example.com'
 ICINGA_EMAIL = 'icinga@example.com'
-
-IPMI_TIMEOUT = 2
-IPMI_RETRIES = 1
 
 SMTP_SERVER = ''
 
@@ -33,7 +36,14 @@ PROXIES = {
     "https": "http://gfw:2333",
 }
 
+# # DNS
+
+# can be a string pattern which contains {cb_token}
+DNS_MONITOR_CALLBACK_URL = 'http://example.com/api/callback/dnsmonitor/{cb_token}'
+DEFAULT_DNS_DOMAIN = 'example.com'
+
 try:
+    from local_config import *  # NOQA
     exec(open(os.path.join(CONFIG_DIR, "config.py")).read())
 except Exception:
     pass

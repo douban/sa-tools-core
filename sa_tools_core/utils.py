@@ -4,8 +4,10 @@ from __future__ import print_function
 
 import os
 import sys
+import six
 import pwd
 import socket
+import binascii
 from functools import wraps
 
 from sa_tools_core.consts import CONFIG_DIR
@@ -67,3 +69,27 @@ def reverse_func(f):
     def wrapper(*args, **kwargs):
         return not f(*args, **kwargs)
     return wrapper
+
+
+def ipv6_addr_to_tinydns_generic(ipv6_addr):
+    rdata = ''
+    hexlify_ipv6_addr = binascii.hexlify(socket.inet_pton(socket.AF_INET6, ipv6_addr))
+    split_hexlify_ipv6_addr = [hexlify_ipv6_addr[i:i+2] for i in range(0, len(hexlify_ipv6_addr), 2)]
+    for part in split_hexlify_ipv6_addr:
+        rdata += '\\%03o' % int(part, 16)
+    return rdata
+
+
+def to_str(s, encoding='utf-8'):
+    '''
+    in python2, convert s to str if s is unicode
+    in python3, convert s to str if s is bytes
+    '''
+    return six.ensure_str(s, encoding=encoding)
+
+
+def output(*args, **kw):
+    '''
+    try to output as UTF-8 encoding strings, to a terminal or a file
+    '''
+    print(*[to_str(a) for a in args], **kw)
