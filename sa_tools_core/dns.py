@@ -404,7 +404,7 @@ def parse_sub_domains(sub_domains, top_level_domain):
                             for sub_domain in external_domains_config.options(domain_group_prefix + domain_group)]
     sub_domains = [sub_domain
                    for sub_domain in sub_domains
-                   if not external_domains_config.has_section(domain_group_prefix + domain_group)] + sub_domains_extended
+                   if not external_domains_config.has_section(domain_group_prefix + sub_domain)] + sub_domains_extended
     return sub_domains
 
 
