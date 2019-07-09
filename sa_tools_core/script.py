@@ -145,7 +145,7 @@ sa-script [-h] [-s] [-f NUM] [-r NUM] [-R] [--host HOST] [--rc RC]
         except SystemExit:
             pass  # ArgumentParser will print error message
         else:
-            args.host_pattern = args.host_pattern or ':'.join(self.mark.iterkeys())
+            args.host_pattern = args.host_pattern or ':'.join(self.mark)
             try:
                 self._run(args)
             except KeyboardInterrupt:
@@ -315,7 +315,7 @@ e.g.:
 
         try:
             self.mark = {host: True
-                         for host, result in self.runner.results.iteritems()
+                         for host, result in self.runner.results.items()
                          if self.mark.get(host) and pred_func(result)}
         except re.error as e:
             self.onecmd('reset')
@@ -323,7 +323,7 @@ e.g.:
 
     def list_fields(self, *fields):
         marked_results = [self.runner.results.get(k)
-                          for k, v in self.mark.iteritems() if v]
+                          for k, v in self.mark.items() if v]
 
         rtn = [[result.get(field, '') for field in fields]
                for result in marked_results]
@@ -401,7 +401,7 @@ class ScriptRunner(object):
         else:
             self.script = script.read()
 
-        self.script = filter(lambda c: c in string.printable, self.script or '')
+        self.script = ''.join([c for c in self.script if c in string.printable]) if self.script else ''
 
         if not self.script:
             raise ScriptEmptyError
@@ -455,8 +455,8 @@ class ScriptRunner(object):
 
         pred_func = pred_failed if self.retry_failed else pred_dark
 
-        for i in xrange(self.max_retries):
-            need_retry = [host for host, result in self._results.iteritems()
+        for i in range(self.max_retries):
+            need_retry = [host for host, result in self._results.items()
                           if pred_func(result)]
 
             print('Retrying {}...'.format(i+1))
@@ -470,7 +470,7 @@ class ScriptRunner(object):
     @property
     def results(self):
         if not self.results_is_processed:
-            for host, result in self._results.iteritems():
+            for host, result in self._results.items():
                 result.update({'host': host})
                 result['rc'] = str(result.get('rc', ''))
                 result['stdout'] = result.get('stdout', '')
