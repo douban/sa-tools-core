@@ -1,6 +1,6 @@
 # coding: utf-8
 '''
-A ansible wrapper which makes ansible 2.x be compatible with ansible 1.9
+An ansible wrapper which makes ansible 2.x be compatible with ansible 1.9
 
 refs:
     - https://docs.ansible.com/ansible/latest/dev_guide/developing_api.html
