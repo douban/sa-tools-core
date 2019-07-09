@@ -43,3 +43,4 @@ if __name__ == '__main__':
     print(c.notify(wework='lihan', content='hehe'))
     print(c.uptime())
     print(c.notify.test)
+    print(c.dns.list(S='@'))
