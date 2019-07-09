@@ -45,7 +45,8 @@ DEFAULT_DNS_DOMAIN = 'example.com'
 # # Scripts
 
 ENABLE_DOA = False
-ANSIBLE_INVENTORY_CONFIG_FILES = ['/etc/ansible/hosts']
+ANSIBLE_INVENTORY_CONFIG_PATH = ['/etc/ansible/hosts']
+ANSIBLE_MODULE_PATH = []
 
 try:
     from local_config import *  # NOQA

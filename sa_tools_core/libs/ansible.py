@@ -1,8 +1,14 @@
 # coding: utf-8
+'''
+A ansible wrapper which makes ansible 2.x be compatible with ansible 1.9
+
+refs:
+    - https://docs.ansible.com/ansible/latest/dev_guide/developing_api.html
+    - https://github.com/ansible/ansible/blob/1da5e21289d7407925190139165a9cd7a3f69960/examples/scripts/uptime.py
+'''
 
 from __future__ import absolute_import, print_function
 
-import shutil
 import logging
 import ansible
 
@@ -27,14 +33,14 @@ from ansible.plugins.callback import CallbackBase
 from ansible import context
 import ansible.constants as C  # NOQA
 
-from sa_tools_core.consts import ANSIBLE_INVENTORY_CONFIG_FILES
+from sa_tools_core.consts import ANSIBLE_INVENTORY_CONFIG_PATH, ANSIBLE_MODULE_PATH
 
 logger = logging.getLogger(__name__)
 
 loader = DataLoader()  # Takes care of finding and reading yaml, json and ini files
 
 # create inventory, use path to host config file as source or hosts in a comma separated string
-inventory = InventoryManager(loader=loader, sources=ANSIBLE_INVENTORY_CONFIG_FILES)
+inventory = InventoryManager(loader=loader, sources=ANSIBLE_INVENTORY_CONFIG_PATH)
 
 Inventory = lambda: inventory  # NOQA
 
@@ -108,8 +114,7 @@ class Runner(object):
         run_hosts = [h.name if isinstance(h, Host) else h for h in run_hosts]
 
         # since the API is constructed for CLI it expects certain options to always be set in the context object
-        # TODO: module_path?
-        context.CLIARGS = ImmutableDict(connection='paramiko_ssh', module_path=['/to/mymodules'],
+        context.CLIARGS = ImmutableDict(connection='paramiko_ssh', module_path=ANSIBLE_MODULE_PATH,
                                         forks=forks, become=become, become_method='sudo',
                                         check=False, diff=False)
 
@@ -153,5 +158,8 @@ class Runner(object):
                 tqm.cleanup()
 
             # Remove ansible tmpdir
-            shutil.rmtree(C.DEFAULT_LOCAL_TMP, True)
+            # shutil.rmtree(C.DEFAULT_LOCAL_TMP, True)
+            if loader:
+                loader.cleanup_all_tmp_files()
+
         return self.callback.results
