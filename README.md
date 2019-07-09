@@ -17,7 +17,7 @@ make init
 make install
 ```
 
-## Usage
+## Command Line Tools
 
 ### sa-dns
 
@@ -48,34 +48,7 @@ sa-dns ensure aqb --type CNAME --value {domain}.h1.aqb.so. --enable
 sa-dns -d dou.bz list
 ```
 
-#### ensure
-
-有几种用法，
-
-1. 无记录时，添加记录
-2. 有记录时，disable 或 enable 记录
-
-由于一个子域名的 CNAME 跟 A 记录是互斥的，必须先 disable 再 enable 另一个，所以 ensure 一条记录可能会产生很多修改请求。
-
-##### excl
-
-为了方便操作，支持 `--excl` 选项，意为独占、排他（exclusive），会 disable 掉该域名的其他同类型记录。
-
-##### dry run
-
-没把握的可以先使用 `--dry-run`，会输出比较详细的信息。
-
-##### 批量操作一组域名
-
-如，
-
-`sa-dns ensure main --type CNAME --value {domain}.h1.aqb.so. --enable`
-
-是将主要域名（在 `external_domains` 这个 ini file 中配置 main 段落）都 CNAME 到对应的 aqb 域名。
-
-`sa-dns ensure main --type A --value 1.1.1.1 --enable --excl`
-
-是将主要域名都解析到 1.1.1.1，同时停止其他 A 记录。
+[see more](docs/sa-dns.md)
 
 ### sa-icinga
 
