@@ -42,6 +42,12 @@ PROXIES = {
 DNS_MONITOR_CALLBACK_URL = 'http://example.com/api/callback/dnsmonitor/{cb_token}'
 DEFAULT_DNS_DOMAIN = 'example.com'
 
+# # Scripts
+
+ENABLE_DOA = False
+ANSIBLE_INVENTORY_CONFIG_PATH = ['/etc/ansible/hosts']
+ANSIBLE_MODULE_PATH = []
+
 try:
     from local_config import *  # NOQA
     exec(open(os.path.join(CONFIG_DIR, "config.py")).read())

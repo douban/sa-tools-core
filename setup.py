@@ -8,9 +8,18 @@ version = '0.1.0'
 requirements = [
     'setuptools',
     'six',
+
+    # sa-notify
     'wechat @ git+https://github.com/tclh123/wechat.git@py3k#egg=wechat-0.4.17',
     'pycrypto',
+
+    # sa-dns
     'pydnspod @ git+https://github.com/tclh123/pydnspod.git@py3k#egg=pydnspod-0.0.3',
+
+    # sa-script
+    'ansible>=2.8',
+    'progressbar2',
+    'terminaltables',
 ]
 
 
@@ -20,7 +29,7 @@ entry_points = """
       sa-dns = sa_tools_core.dns:main
       # sa-node = sa_tools_core.node:main
       # sa-rsync = sa_tools_core.rsync:main
-      # sa-script = sa_tools_core.script:main
+      sa-script = sa_tools_core.script:main
       # sa-lvs = sa_tools_core.lvs:main
       # sa-disk = sa_tools_core.disk:main
       sa-notify = sa_tools_core.notify:main
