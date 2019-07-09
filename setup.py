@@ -17,7 +17,7 @@ requirements = [
     'pydnspod @ git+https://github.com/tclh123/pydnspod.git@py3k#egg=pydnspod-0.0.3',
 
     # sa-script
-    'ansible>=1.9,<2.0',
+    'ansible>=2.8',
     'progressbar2',
     'terminaltables',
 ]

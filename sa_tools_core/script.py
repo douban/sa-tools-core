@@ -23,8 +23,6 @@ from sa_tools_core.libs.editor import Editor
 from sa_tools_core.utils import reverse_func
 from sa_tools_core.consts import ENABLE_DOA
 
-import ansible.utils.template  # NOQA
-from ansible import errors  # NOQA
 if ENABLE_DOA:
     try:
         # doa is the douban ansible wrapper which supports regions
@@ -34,9 +32,8 @@ if ENABLE_DOA:
     except ImportError:
         ENABLE_DOA = False
 if not ENABLE_DOA:
-    from ansible.callbacks import DefaultRunnerCallbacks # NOQA
-    from ansible.inventory import Inventory # NOQA
-    from ansible.runner import Runner # NOQA
+    from sa_tools_core.libs.ansible import (DefaultRunnerCallbacks,  # NOQA
+                                            Inventory, Runner)  # NOQA
 
 logger = logging.getLogger(__name__)
 
@@ -301,12 +298,12 @@ e.g.:
         pattern = pattern.strip()
 
         if op == '=':
-            pred_func = lambda result: fnmatch(result.get(key), pattern) # NOQA
+            pred_func = lambda result: fnmatch(result.get(key), pattern)  # NOQA
         elif op == '~':
-            pred_func = lambda result: re.search(pattern, result.get(key)) # NOQA
+            pred_func = lambda result: re.search(pattern, result.get(key))  # NOQA
         else:
             # pattern is None or empty string
-            pred_func = lambda result: result.get(key) # NOQA
+            pred_func = lambda result: result.get(key)  # NOQA
 
         if reverse:
             pred_func = reverse_func(pred_func)
@@ -356,6 +353,7 @@ class ScriptRunnerCallbacks(DefaultRunnerCallbacks):
     def __init__(self, pbar):
         self.pbar = pbar
         self.counter = Value('i', 0)
+        super(ScriptRunnerCallbacks, self).__init__()
 
     def on_failed(self, host, res, ignore_errors=False):
         self.update_pbar()
@@ -452,8 +450,8 @@ class ScriptRunner(object):
 
     def retry(self):
 
-        pred_failed = lambda result: result.get('rc', None) != 0 # NOQA
-        pred_dark = lambda result: result.get('rc', None) is None # NOQA
+        pred_failed = lambda result: result.get('rc', None) != 0  # NOQA
+        pred_dark = lambda result: result.get('rc', None) is None  # NOQA
 
         pred_func = pred_failed if self.retry_failed else pred_dark
 
@@ -476,7 +474,7 @@ class ScriptRunner(object):
                 result.update({'host': host})
                 result['rc'] = str(result.get('rc', ''))
                 result['stdout'] = result.get('stdout', '')
-                result['stderr'] = result.get('stderr', result.get('msg', ''))
+                result['stderr'] = result.get('stderr', result.get('msg', '') + result.get('exception', ''))
 
             self.results_is_processed = True
 
