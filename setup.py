@@ -44,7 +44,7 @@ scripts = [
 setup(name='sa-tools-core',
       version=version,
       description="SA Tools Core",
-      long_description=open("README.md").read(),
+      long_description=open("README.md", encoding='utf-8').read(),
       # Get more strings from
       # https://pypi.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
