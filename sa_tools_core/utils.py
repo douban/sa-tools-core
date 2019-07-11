@@ -6,6 +6,7 @@ import os
 import sys
 import six
 import pwd
+import json
 import socket
 import binascii
 from functools import wraps
@@ -93,3 +94,32 @@ def output(*args, **kw):
     try to output as UTF-8 encoding strings, to a terminal or a file
     '''
     print(*[to_str(a) for a in args], **kw)
+
+
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+
+    def __getattr__(self, attr):
+        return self.get(attr, self.get('_default_value'))
+
+    def __setattr__(self, attr, value):
+        self[attr] = value
+
+
+def props(cls):
+    return [i for i in cls.__dict__ if not i.startswith('_')]
+
+
+def i2ip(i):
+    i = int(i)
+    return '%s.%s.%s.%s' % ((i >> 24) % 256,
+                            (i >> 16) % 256,
+                            (i >> 8) % 256,
+                            i % 256)
+
+
+def jprint(obj):
+    ret = json.dumps(obj, ensure_ascii=False, indent=4)
+    ret = ret.encode('utf8')
+    print(ret)

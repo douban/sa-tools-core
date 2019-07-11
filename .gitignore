@@ -6,7 +6,6 @@
 
 # Project
 local_config.py
-local_config.py.example
 /config
 /tmp
 /venv
