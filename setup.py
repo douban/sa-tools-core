@@ -20,6 +20,9 @@ requirements = [
     'ansible>=2.8',
     'progressbar2',
     'terminaltables',
+
+    # sa-access
+    'elasticsearch>=2.0.0,<3.0.0',
 ]
 
 
@@ -34,7 +37,7 @@ entry_points = """
       # sa-disk = sa_tools_core.disk:main
       sa-notify = sa_tools_core.notify:main
       # sa-icinga = sa_tools_core.icinga:main
-      # sa-access = sa_tools_core.access:main
+      sa-access = sa_tools_core.access:main
       # sa-bs = sa_tools_core.bs:main
       """
 

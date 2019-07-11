@@ -19,9 +19,13 @@ make install
 
 ## Command Line Tools
 
+### sa-notify
+
+TODO
+
 ### sa-dns
 
-```
+```shell
 # 切 aqb
 sa-dns ensure main --type CNAME --value {domain}.h1.aqb.so. --enable
 # 切 A 记录
@@ -50,6 +54,25 @@ sa-dns -d dou.bz list
 
 [see more](docs/sa-dns.md)
 
+### sa-script
+
+TODO
+
+### sa-access
+
+access log 查询分析工具，支持简单查询，聚合查询，时段对比分析等
+
+```shell
+sa-access query
+sa-access query --term ip 1.1.1.1
+sa-access query -t host example.com -x bandwidth --by ip
+sa-access query --term appname app1 -x count --by-script "doc['remote_addr'].value + ' ' + doc['normalize_url'].value"
+sa-access query --term appname app1 -x count --by-script "def ip=doc['remote_addr'].value;(ip >>24) + '.' + ((ip >> 16) % 256) + '.' + ((ip >> 8) % 256) + '.' + (ip % 256) + ' ' + doc['normalize_url'].value"
+sa-access analyze --term host example.com -x sum bytes_sent --by nurl -a '2017-03-28 09:30' -d 15 -b '2017-03-28 10:30'
+```
+
+[see more](docs/sa-access.md)
+
 ### sa-icinga
 
 icinga2 doc: <http://docs.icinga.org/icinga2/latest/doc/module/icinga2/toc>
@@ -69,6 +92,10 @@ $ sa-icinga show --type user | grep user1
 $ sa-icinga show --filter 'service.name == "check-puppet"' --attrs acknowledgement
 ```
 
-### sa-notify
+### sa-disk
+
+TODO
+
+### sa-bs
 
 TODO
