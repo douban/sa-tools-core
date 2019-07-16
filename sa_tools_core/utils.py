@@ -8,7 +8,6 @@ import six
 import pwd
 import json
 import socket
-import builtins
 import binascii
 from functools import wraps
 
@@ -98,7 +97,7 @@ def output(*args, **kw):
 
 
 def prompt_input(prompt=None):
-    builtins.input(prompt)
+    six.moves.input(prompt)
 
 
 class AttrDict(dict):
