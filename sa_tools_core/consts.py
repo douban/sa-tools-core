@@ -21,9 +21,6 @@ ICINGA_EMAIL = 'icinga@example.com'
 
 SMTP_SERVER = ''
 
-NCDU_EXPORT_DATA_PATH = "/data1"
-NCDU_JOB_LOCK_PREFIX = "/tmp/sa-disk-ncdu-lock"
-
 NOTIFICATION_GATEWAY_API = ''
 NOTIFICATION_GATEWAY_TIMEOUT = 10  # 10s
 
@@ -49,6 +46,11 @@ DEFAULT_DNS_DOMAIN = 'example.com'
 ENABLE_DOA = False
 ANSIBLE_INVENTORY_CONFIG_PATH = ['/etc/ansible/hosts']
 ANSIBLE_MODULE_PATH = []
+
+# # Disk
+
+NCDU_EXPORT_DATA_PATH = "/data1"
+NCDU_JOB_LOCK_PREFIX = "/tmp/sa-disk-ncdu-lock"
 
 try:
     from local_config import *  # NOQA

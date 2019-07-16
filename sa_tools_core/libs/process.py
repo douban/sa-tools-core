@@ -41,15 +41,20 @@ import subprocess
 logger = logging.getLogger(__name__)
 
 
-def _call(cmd, env=None):
+def _call(cmd, env=None, nonblock=False, shell=False):
+    '''if nonblock, return the process itself, otherwise return a result dict'''
+    fullcmd = cmd if shell else ' '.join(cmd)
+    logger.debug("Running process %s" % fullcmd)
     kw = dict(env=env) if env else {}
     try:
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+        process = subprocess.Popen(cmd, shell=shell, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE,
                                    universal_newlines=True, **kw)
     except (OSError, TypeError) as err:
-        logger.error("Error occurrred when calling %s" % " ".join(cmd))
+        logger.error("Error occurrred when calling %s" % fullcmd)
         raise err
+    if nonblock:
+        return process
     out, err = process.communicate()
     out = str(out)
     err = str(err)
@@ -58,7 +63,7 @@ def _call(cmd, env=None):
     result['returncode'] = process.returncode
     result['stdout'] = out
     result['stderr'] = err
-    result['fullcmd'] = " ".join(cmd)
+    result['fullcmd'] = fullcmd
     return result
 
 
@@ -108,9 +113,17 @@ class Process(object):
         proc._parse_args(*a, **kw)
         return proc
 
-    def call(self, cmdstr='', env=None):
-        extra_cmds = shlex.split(cmdstr)
-        return _call(self.cmds + extra_cmds, env=env)
+    def call(self, cmdstr='', env=None, nonblock=False, shell=False):
+        if not shell:
+            extra_cmds = shlex.split(cmdstr)
+            cmd = self.cmds + extra_cmds
+        else:
+            cmd = ' '.join(self.cmds)
+            if cmd:
+                cmd += ' ' + cmdstr
+            else:
+                cmd = cmdstr
+        return _call(cmd, env=env, nonblock=nonblock, shell=shell)
 
 
 process = Process()

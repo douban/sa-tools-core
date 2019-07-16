@@ -23,6 +23,9 @@ requirements = [
 
     # sa-access
     'elasticsearch>=2.0.0,<3.0.0',
+
+    # sa-disk
+    'humanize',
 ]
 
 
@@ -34,7 +37,7 @@ entry_points = """
       # sa-rsync = sa_tools_core.rsync:main
       sa-script = sa_tools_core.script:main
       # sa-lvs = sa_tools_core.lvs:main
-      # sa-disk = sa_tools_core.disk:main
+      sa-disk = sa_tools_core.disk:main
       sa-notify = sa_tools_core.notify:main
       # sa-icinga = sa_tools_core.icinga:main
       sa-access = sa_tools_core.access:main
