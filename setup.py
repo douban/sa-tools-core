@@ -1,5 +1,6 @@
 # coding: utf-8
 
+from io import open
 from setuptools import setup, find_packages
 
 version = '0.1.0'
