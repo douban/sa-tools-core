@@ -77,7 +77,7 @@ sa-access analyze --term host example.com -x sum bytes_sent --by nurl -a '2017-0
 
 icinga2 doc: <http://docs.icinga.org/icinga2/latest/doc/module/icinga2/toc>
 
-```
+```shell
 $ sa-icinga notify --wechat user1 --email user1@douban.com  # need icinga pass os environment vars
 
 $ sa-icinga ack --host sa --service check-puppet --comment 'hehe'
@@ -94,7 +94,18 @@ $ sa-icinga show --filter 'service.name == "check-puppet"' --attrs acknowledgeme
 
 ### sa-disk
 
-TODO
+```shell
+sa-disk usage
+sa-disk usage -n 5 -d 3
+sa-disk usage -r /data1/ncdu-export-%-20160513142844.gz
+sa-disk usage -c /tmp
+sa-disk usage -p /data
+sa-disk usage --force-check
+
+sa-disk clean
+```
+
+[see more](docs/sa-disk.md)
 
 ### sa-bs
 

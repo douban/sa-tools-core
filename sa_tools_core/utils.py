@@ -81,12 +81,12 @@ def ipv6_addr_to_tinydns_generic(ipv6_addr):
     return rdata
 
 
-def to_str(s, encoding='utf-8'):
+def to_str(s, encoding='utf-8', errors='strict'):
     '''
     in python2, convert s to str if s is unicode
     in python3, convert s to str if s is bytes
     '''
-    return six.ensure_str(s, encoding=encoding)
+    return six.ensure_str(s, encoding=encoding, errors=errors)
 
 
 def output(*args, **kw):
@@ -94,6 +94,10 @@ def output(*args, **kw):
     try to output as UTF-8 encoding strings, to a terminal or a file
     '''
     print(*[to_str(a) for a in args], **kw)
+
+
+def prompt_input(prompt=None):
+    six.moves.input(prompt)
 
 
 class AttrDict(dict):
