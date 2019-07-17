@@ -9,7 +9,10 @@ import pwd
 import json
 import socket
 import binascii
+import importlib
 from functools import wraps
+
+import inflect
 
 from sa_tools_core.consts import CONFIG_DIR
 
@@ -17,6 +20,8 @@ HOSTS_FILE = '/etc/hosts'
 HOSTS_WAN_FILE = '/etc/hosts.wan'
 
 ip_hostname_cache = {}
+
+inflect_engine = inflect.engine()
 
 
 def get_os_username():
@@ -127,3 +132,13 @@ def jprint(obj):
     ret = json.dumps(obj, ensure_ascii=False, indent=4)
     ret = ret.encode('utf8')
     print(ret)
+
+
+def plural(a):
+    return inflect_engine.plural(a)
+
+
+def import_string(s):
+    mod, attr = s.split(':')
+    mod = importlib.import_module(mod)
+    return getattr(mod, attr) if attr else mod

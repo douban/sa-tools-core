@@ -19,6 +19,8 @@ make install
 
 ## Command Line Tools
 
+For all the CLI tools, you can type `-h` or `--help` to get help messages and examples.
+
 ### sa-notify
 
 TODO
@@ -78,19 +80,24 @@ sa-access analyze --term host example.com -x sum bytes_sent --by nurl -a '2017-0
 icinga2 doc: <http://docs.icinga.org/icinga2/latest/doc/module/icinga2/toc>
 
 ```shell
-$ sa-icinga notify --wechat user1 --email user1@douban.com  # need icinga pass os environment vars
+# try test
+sa-icinga notify --wechat lihan --email lihan@douban.com --test
 
-$ sa-icinga ack --host sa --service check-puppet --comment 'hehe'
-$ sa-icinga ack --host 'sa*' --service 'check-puppet'
-$ sa-icinga ack --host 'sa*' --service 'check-puppet' --remove
+sa-icinga notify --wechat user1 --email user1@douban.com  # need icinga pass os environment vars
 
-$ sa-icinga show --filter 'host.name == "sa" && service.name == "check-puppet"'
-$ sa-icinga show --type host --filter 'match("sa*", host.name)' | less
-$ sa-icinga show --type service --filter 'regex("check_[a-z]*", service.name)' | less
-$ sa-icinga show --type notification --filter 'notification.host_name == "sa"' | less
-$ sa-icinga show --type user | grep user1
-$ sa-icinga show --filter 'service.name == "check-puppet"' --attrs acknowledgement
+sa-icinga ack --host sa --service check-puppet --comment 'hehe'
+sa-icinga ack --host 'sa*' --service 'check-puppet'
+sa-icinga ack --host 'sa*' --service 'check-puppet' --remove
+
+sa-icinga show --filter 'host.name == "sa" && service.name == "check-puppet"'
+sa-icinga show --type host --filter 'match("sa*", host.name)' | less
+sa-icinga show --type service --filter 'regex("check_[a-z]*", service.name)' | less
+sa-icinga show --type notification --filter 'notification.host_name == "sa"' | less
+sa-icinga show --type user | grep user1
+sa-icinga show --filter 'service.name == "check-puppet"' --attrs acknowledgement
 ```
+
+[see more](docs/sa-icinga.md)
 
 ### sa-disk
 
