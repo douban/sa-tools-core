@@ -17,12 +17,8 @@ NODE_SLACK_CHANNEL = '#sa'
 NODE_MAIL_TO = 'sa@example.com'
 
 SYSADMIN_EMAIL = 'sysadmin@example.com'
-ICINGA_EMAIL = 'icinga@example.com'
 
 SMTP_SERVER = ''
-
-NOTIFICATION_GATEWAY_API = ''
-NOTIFICATION_GATEWAY_TIMEOUT = 10  # 10s
 
 PROXIES = {
     "http": "http://gfw:2333",
@@ -51,6 +47,21 @@ ANSIBLE_MODULE_PATH = []
 
 NCDU_EXPORT_DATA_PATH = "/data1"
 NCDU_JOB_LOCK_PREFIX = "/tmp/sa-disk-ncdu-lock"
+
+# # Icinga2
+
+ICINGA_EMAIL = 'icinga@example.com'
+# see https://docs.sentry.io/error-reporting/configuration/?platform=python for more details
+SENTRY_DSN = 'https://<key>@sentry.io/<project>'
+
+# notification gateway is a web service that stores and analyizes notifications. We have one in douban, you can build
+# your own.
+NOTIFICATION_GATEWAY_API = ''
+NOTIFICATION_GATEWAY_TIMEOUT = 10  # 10s
+
+ICINGA_CACERT = '/etc/icinga2/ssl/certs/ca.pem'
+# see sa_tools_core.libs.icinga for more details
+ICINGA_CLUSTER_CONFIG_CLASS = 'mod1.mod2.mod3:class1'
 
 try:
     from local_config import *  # NOQA

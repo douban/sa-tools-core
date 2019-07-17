@@ -36,7 +36,7 @@ class Notifier(object):
                 addrs = kw.get('addrs') or a[0]
                 addrs = [addr for addr in addrs if addr]
                 if not addrs:
-                    logger.warning('notify abort, ignoring empty addrs')
+                    logger.warning('notify abort, ignoring empty %s addrs', attr)
                     return
                 kw['content'] = kw.get('content') or self.content
                 kw['title'] = kw.get('title') or self.title
