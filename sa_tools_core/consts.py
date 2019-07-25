@@ -60,8 +60,9 @@ NOTIFICATION_GATEWAY_API = ''
 NOTIFICATION_GATEWAY_TIMEOUT = 10  # 10s
 
 ICINGA_CACERT = '/etc/icinga2/ssl/certs/ca.pem'
+# you need to inhert IcingaClusterConfig and impl your own config class
 # see sa_tools_core.libs.icinga for more details
-ICINGA_CLUSTER_CONFIG_CLASS = 'mod1.mod2.mod3:class1'
+ICINGA_CLUSTER_CONFIG_CLASS = 'sa_tools_core.libs.icinga:IcingaClusterConfig'
 
 try:
     from local_config import *  # NOQA
