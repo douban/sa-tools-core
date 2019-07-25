@@ -1,5 +1,7 @@
 # SA Tools Core
 
+![](https://img.shields.io/pypi/pyversions/sa-tools-core)
+
 SA Tools 顾名思义是 System Administrator 的工具集，包含一些实用工具，涉及 DNS 管理、远程批量执行脚本、日志分析查询、通知提醒等。
 
 ## Install
