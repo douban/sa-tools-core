@@ -2,6 +2,12 @@
 
 SA Tools 顾名思义是 System Administrator 的工具集，包含一些实用工具，涉及 DNS 管理、远程批量执行脚本、日志分析查询、通知提醒等。
 
+## Install
+
+```
+pip install sa-tools-core
+```
+
 ## Development guide
 
 Currently support python2.7 ~ python3.7
@@ -9,8 +15,13 @@ Currently support python2.7 ~ python3.7
 ### Quick start
 
 ```
+# first clone this repo
+cd sa-tools-core
+
 make init
 ```
+
+See Makefile for more details.
 
 ### Re-install after modify codes
 
@@ -40,12 +51,16 @@ For all the CLI tools, you can type `-h` or `--help` to get help messages and ex
 
 ### sa-notify
 
+通知提醒工具，支持 wechat, wework(企业微信), email, sms, pushbullet, pushover, telegram 等多种通知类型。
+
 ```shell
 sa-notify --wechat user1 --content 'xxx'
 echo 'xxx' | sa-notify --wechat user1,user2 --email user1@example.com user3@example.com
 ```
 
 ### sa-dns
+
+DNS 管理工具，目前仅支持 DNSPod。
 
 ```shell
 # 切 A 记录
@@ -76,10 +91,19 @@ sa-dns -d dou.bz list
 
 A remote script runner tool based on ansible. To use it, you need to prepare your ansible environment first.
 
+远程命令执行工具，目前基于 ansible，需要事先配置好 ansible 环境(/etc/ansible/hosts)。
+
+一些特点，
+
+- 兼容 ansible host pattern
+- 脚本可从 stdin 传入或指定文件路径，若都不指定则会调用 editor 进入编辑模式(类似 git commit 时的行为)。
+- 批量执行，有进度条
+- 执行完毕后会进入交互模式，可以对结果进行筛选，支持 shell 管道操作，支持再次发起执行
+
 ```shell
 $ echo 'uptime && echo $HOSTNAME $(whoami)' | sa-script test_zk
 Executing...
-100%|##################################################################################################################################################|Elapsed Time: 0:00:09
+100%|######################################################|Elapsed Time: 0:00:09
 
 +----------+----+-------------------------------------------------------+--------+
 | host     | rc | stdout                                                | stderr |
@@ -114,6 +138,8 @@ sa-access analyze --term host example.com -x sum bytes_sent --by nurl -a '2017-0
 
 ### sa-icinga
 
+一个 Icinga2 的 CLI 工具。
+
 icinga2 doc: <http://docs.icinga.org/icinga2/latest/doc/module/icinga2/toc>
 
 ```shell
@@ -137,6 +163,8 @@ sa-icinga show --filter 'service.name == "check-puppet"' --attrs acknowledgement
 [see more](docs/sa-icinga.md)
 
 ### sa-disk
+
+磁盘相关工具，利用 ncdu 快速扫盘，并可以保存、分析结果。
 
 ```shell
 sa-disk usage
