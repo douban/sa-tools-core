@@ -81,9 +81,9 @@ icinga2 doc: <http://docs.icinga.org/icinga2/latest/doc/module/icinga2/toc>
 
 ```shell
 # try test
-sa-icinga notify --wechat lihan --email lihan@douban.com --test
+sa-icinga notify --wechat user1 --email user1@example.com --test
 
-sa-icinga notify --wechat user1 --email user1@douban.com  # need icinga pass os environment vars
+sa-icinga notify --wechat user1 --email user1@example.com  # need icinga pass os environment vars
 
 sa-icinga ack --host sa --service check-puppet --comment 'hehe'
 sa-icinga ack --host 'sa*' --service 'check-puppet'
