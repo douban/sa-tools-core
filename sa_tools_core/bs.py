@@ -282,7 +282,7 @@ def output_simplify(args, output):
     return True, _simplify(data)
 
 
-# TODO: support direct call
+# TODO: support direct API call
 def _execute(mod_suffix, action, params):
     logger.debug('call _execute(%s, %s, %s)', mod_suffix, action, params)
 

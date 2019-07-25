@@ -138,6 +138,8 @@ sa-disk clean
 
 `sa-bs` 是对腾讯云 API/CLI 的封装，支持黑石、CVM 等产品。
 
+需要先安装并配置 [qcloudcli](https://github.com/QcloudApi/qcloudcli)。
+
 ```shell
 sa-bs device list -j
 sa-bs device list -a alias
