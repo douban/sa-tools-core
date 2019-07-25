@@ -130,7 +130,8 @@ def i2ip(i):
 
 def jprint(obj):
     ret = json.dumps(obj, ensure_ascii=False, indent=4)
-    ret = ret.encode('utf8')
+    # TODO:
+    ret = ret.encode('utf-8')
     print(ret)
 
 

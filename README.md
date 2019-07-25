@@ -25,7 +25,7 @@ For all the CLI tools, you can type `-h` or `--help` to get help messages and ex
 
 ```shell
 sa-notify --wechat user1 --content 'xxx'
-echo 'xxx' | sa-notify --wechat user1,user2 --email user1@douban.com user3@douban.com
+echo 'xxx' | sa-notify --wechat user1,user2 --email user1@example.com user3@example.com
 ```
 
 ### sa-dns
@@ -136,7 +136,53 @@ sa-disk clean
 
 ### sa-bs
 
-TODO
+`sa-bs` 是对腾讯云 API/CLI 的封装，支持黑石、CVM 等产品。
+
+```shell
+sa-bs device list -j
+sa-bs device list -a alias
+sa-bs device list --alias host
+sa-bs vpc list -e createTime vpcId
+sa-bs vpc subnet
+sa-bs vpc subnet_ips --vpcId 1001 --subnetId 6555 -j
+sa-bs vpc subnet_ips --subnetName SA
+sa-bs vpc subnet_by_cpm_id --alias host22
+sa-bs eip list -a eip
+sa-bs lb list
+sa-bs -vvvv eip list --eipIds '[\\"eip-xxxxxxxx\\"]' -r
+sa-bs eip list --eip 1.1.1.1
+sa-bs vpc register_batch_ip --subnetName SA --ip 10.0.0.1
+sa-bs eip apply
+sa-bs eip bind_vpc_ip --eip 1.1.1.1 --vpcIp 10.0.0.1
+sa-bs vpc create_interface --alias host11 host22 --subnetName DBA-dummy
+sa-bs device reload_os --passwd XXXXXX --subnetName OfflineComputation --alias host88
+sa-bs device modify_alias --alias host33 --instanceId cpm-xxxxxxxx
+sa-bs -vvvv vpc create_subnet --subnetName Isolation-dummy --cidrBlock 10.0.1.0/24 --vlanId 2222
+
+## 机型组合
+sa-bs device list -e deviceClassCode
+sa-bs device os --deviceClassCode Y0-BS09v2 -a osNameDisplay osTypeId
+sa-bs device class_partition --cpuId 4 --diskNum1 2 --diskNum2 12 --diskTypeId1 1 --diskTypeId2 6 --haveRaidCard 0 --mem 64 --deviceClassCode "Y0-BS09v2"
+sa-bs device class_partition --cpuId 4 --diskNum1 2 --diskNum2 12 --diskTypeId1 1 --diskTypeId2 6 --haveRaidCard 0 --mem 64
+sa-bs device elastic_price --cpuId 4 --diskNum1 2 --diskNum2 12 --diskTypeId1 1 --diskTypeId2 6 --haveRaidCard 0 --mem 64
+sa-bs device inventory --cpuId 4 --diskNum1 2 --diskNum2 12 --diskTypeId1 1 --diskTypeId2 6 --haveRaidCard 0 --mem 64 --deviceClassCode "Y0-BS09v2" --subnetName OfflineComputation
+sa-bs device hardware_info --alias host11
+sa-bs device hardware_specification
+
+### 购买机器 ( see https://cloud.tencent.com/document/api/386/6638 )
+sa-bs device buy --goodsNum 2 --timeSpan 1 --timeUnit m --alias new_host \
+  --subnetName SA --ip 10.0.0.2 10.0.0.3 \
+  --cpuId 4 --diskNum1 2 --diskNum2 12 --diskTypeId1 1 --diskTypeId2 6 --haveRaidCard 0 --mem 64 \
+  --raidId 25 \
+  --deviceClassCode "Y0-BS09v2" --needSecurityAgent 0 --needMonitorAgent 0 --autoRenewFlag 1
+sa-bs device deploy_process --instanceId cpm-xxxxxxxx
+sa-bs device deploy_process --alias host11
+sa-bs device operation_log --alias host22
+
+## CVM
+
+sa-bs cvm instances
+```
 
 ## Client
 

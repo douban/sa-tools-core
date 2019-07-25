@@ -31,7 +31,6 @@ requirements = [
     # sa-icinga
     'sentry-sdk',
     'Mako',
-    # TODO: py3k?
     'icinga2-api @ git+https://github.com/tclh123/icinga2-api.git@master#egg=icinga2-api-0.1.0',
     'inflect',
 ]
@@ -49,7 +48,7 @@ entry_points = """
       sa-notify = sa_tools_core.notify:main
       sa-icinga = sa_tools_core.icinga:main
       sa-access = sa_tools_core.access:main
-      # sa-bs = sa_tools_core.bs:main
+      sa-bs = sa_tools_core.bs:main
       """
 
 scripts = [

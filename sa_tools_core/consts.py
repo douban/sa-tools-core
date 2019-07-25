@@ -64,6 +64,27 @@ ICINGA_CACERT = '/etc/icinga2/ssl/certs/ca.pem'
 # see sa_tools_core.libs.icinga for more details
 ICINGA_CLUSTER_CONFIG_CLASS = 'sa_tools_core.libs.icinga:IcingaClusterConfig'
 
+# # BS(Black Stone)
+
+BS_API_REQUESTS_MODULE_PREFIX = 'sa_tools_core.libs.qcloud.qcloudsdk'
+BS_CMD_PATTERN = 'qcloudcli "{module}" "{action}" {params}'
+BS_DEFAULT_ATTRS = (
+    'alias', 'eipName', 'subnetName',
+    # 'vpcName', 'natName', 'instanceAlias',
+    # 'instanceId', 'vlanId', 'natUid', 'unInstanceId', 'subnetId',
+    'lanIp', 'vpcIp', 'eip',
+    'cidrBlock', 'cidr',
+)
+BS_DEFAULT_PARAMS = {
+    'limit': 100,
+}
+BS_DEFAULT_PARAMS_BM = {
+    'vpcId': 1001,
+    'unVpcId': 'vpc-xxxxxxxx',
+    'zoneId': 1000800001,  # 可用区ID。可通过 DescribeRegions 接口用来获取黑石物理机可用区。
+}
+BS_PLURAL_SUFFIX = ['s', 'List', 'Set']
+
 try:
     from local_config import *  # NOQA
     exec(open(os.path.join(CONFIG_DIR, "config.py")).read())
