@@ -6,16 +6,17 @@ from setuptools import setup, find_packages
 version = '0.1.0'
 
 
+# FIXME: We temporarily comment these direct url dependencies so that the project can be published to pypi
 requirements = [
     'setuptools',
     'six',
 
     # sa-notify
-    'wechat @ git+https://github.com/tclh123/wechat.git@py3k#egg=wechat-0.4.17',
+    # 'wechat @ git+https://github.com/tclh123/wechat.git@py3k#egg=wechat-0.4.17',
     'pycrypto',
 
     # sa-dns
-    'pydnspod @ git+https://github.com/tclh123/pydnspod.git@py3k#egg=pydnspod-0.0.3',
+    # 'pydnspod @ git+https://github.com/tclh123/pydnspod.git@py3k#egg=pydnspod-0.0.3',
 
     # sa-script
     'ansible>=2.8',
@@ -31,7 +32,7 @@ requirements = [
     # sa-icinga
     'sentry-sdk',
     'Mako',
-    'icinga2-api @ git+https://github.com/tclh123/icinga2-api.git@master#egg=icinga2-api-0.1.0',
+    # 'icinga2-api @ git+https://github.com/tclh123/icinga2-api.git@master#egg=icinga2-api-0.1.0',
     'inflect',
 ]
 
@@ -58,15 +59,29 @@ setup(name='sa-tools-core',
       version=version,
       description="SA Tools Core",
       long_description=open("README.md", encoding='utf-8').read(),
+      long_description_content_type='text/markdown',
       # Get more strings from
       # https://pypi.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
-          "Programming Language :: Python",
+          'Programming Language :: Python',
+          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: 3.7',
+          'Development Status :: 5 - Production/Stable',
+          'Environment :: Console',
+          'Intended Audience :: Developers',
+          'License :: OSI Approved :: BSD License',
+          'Operating System :: POSIX :: Linux',
+          'Topic :: Software Development :: Libraries :: Python Modules'
       ],
-      keywords='',
+      url='https://github.com/douban/sa-tools-core',
+      keywords=['sa-tools', 'sysadmin', 'command line tools'],
       author='sysadmin',
       author_email='sysadmin@douban.com',
-      license='Douban',
+      license='BSD License',
       packages=find_packages(exclude=['examples*', 'tests*']),
       include_package_data=True,
       zip_safe=False,

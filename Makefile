@@ -25,3 +25,14 @@ init2: new_venv2
 
 test:
 	@python setup.py test
+
+clean:
+	@rm -rf dist build
+
+dist: clean
+	@source venv/bin/activate; pip install --upgrade setuptools wheel
+	@source venv/bin/activate; python3 setup.py sdist bdist_wheel
+
+publish: dist
+	@source venv/bin/activate; pip install --upgrade twine
+	@source venv/bin/activate; twine upload dist/*
