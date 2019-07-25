@@ -1,21 +1,38 @@
 # SA Tools Core
 
+SA Tools 顾名思义是 System Administrator 的工具集，包含一些实用工具，涉及 DNS 管理、远程批量执行脚本、日志分析查询、通知提醒等。
 
 ## Development guide
 
 Currently support python2.7 ~ python3.7
 
-### quick start
+### Quick start
 
 ```
 make init
 ```
 
-### re-install after modify codes
+### Re-install after modify codes
 
 ```
 make install
 ```
+
+## Configuration
+
+```
+cp local_config.py.example local_config.py
+# then edit local_config.py
+vi local_config.py
+```
+
+You can use a system-wide configuration path as well, by default it is `/etc/sa-tools/`, it can be configured via `CONFIG_DIR`.
+
+Local configs will override [sa_tools_core/consts.py](sa_tools_core/consts.py).
+
+For other third party service configs, see [examples/config](examples/config).
+
+You can put third party service configs to `/etc/sa-tools/` directory.
 
 ## Command Line Tools
 

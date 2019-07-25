@@ -1,0 +1,16 @@
+[main]
+www
+book
+movie
+music
+
+[top_level_record]
+@
+
+[example2.com:top_level_record]
+@
+
+[example2.com:all]
+*.host1
+host2
+host3
