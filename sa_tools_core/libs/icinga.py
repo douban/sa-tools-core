@@ -18,19 +18,19 @@ class IcingaClusterConfig(object):
     """
     @classmethod
     def get_ack_link(cls, env):
-        raise NotImplementedError
+        return ''
 
     @classmethod
     def get_reboot_host_link(cls, env):
-        raise NotImplementedError
+        return ''
 
     @classmethod
     def get_icinga_link(cls, env):
-        raise NotImplementedError
+        return ''
 
     @classmethod
     def get_icinga_hosts(cls):
-        raise NotImplementedError
+        return []
 
 
 class IcingaApi(object):

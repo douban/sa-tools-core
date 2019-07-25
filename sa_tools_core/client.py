@@ -40,7 +40,7 @@ class Client(Process):
 
 if __name__ == '__main__':
     c = Client()
-    print(c.notify(wework='lihan', content='hehe'))
+    print(c.notify(wework='user1', content='hehe'))
     print(c.uptime())
     print(c.notify.test)
     print(c.dns.list(S='@'))

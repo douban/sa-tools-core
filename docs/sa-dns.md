@@ -8,9 +8,7 @@ sa-dns -h
 
 Examples,
 
-```
-# 切 aqb
-sa-dns ensure main --type CNAME --value {domain}.h1.aqb.so. --enable
+```shell
 # 切 A 记录
 sa-dns ensure main --type A --value 1.1.1.1 --enable
 # dry-run
@@ -19,6 +17,8 @@ sa-dns ensure main --type A --value 1.1.1.1 --enable --dry-run
 sa-dns ensure main --type A --value 1.1.1.1 --enable --excl
 # 调整 ttl
 sa-dns ensure main --type A --value 1.1.1.1 --ttl 100 --enable
+# 批量切 CNAME 记录，常用于 CNAME 到 CDN 等操作
+sa-dns ensure main --type CNAME --value {domain}.h1.aqb.so. --enable
 
 # 查找子域记录
 sa-dns list -S music
@@ -27,11 +27,7 @@ sa-dns list -s aqb
 # 按正则查找子域（查看 aqb 的测试域名）
 sa-dns list | grep -E '^.*aqb\s'
 
-# 测试 aqb 测试域名
-sa-dns ensure aqb --type A --value 1.1.1.1 --enable --excl
-sa-dns ensure aqb --type CNAME --value {domain}.h1.aqb.so. --enable
-
-# 支持 -d,--domain 参数
+# 支持通过 -d,--domain 指定其他域名
 sa-dns -d dou.bz list
 ```
 

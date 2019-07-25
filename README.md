@@ -23,13 +23,14 @@ For all the CLI tools, you can type `-h` or `--help` to get help messages and ex
 
 ### sa-notify
 
-TODO
+```shell
+sa-notify --wechat user1 --content 'xxx'
+echo 'xxx' | sa-notify --wechat user1,user2 --email user1@example.com user3@example.com
+```
 
 ### sa-dns
 
 ```shell
-# 切 aqb
-sa-dns ensure main --type CNAME --value {domain}.h1.aqb.so. --enable
 # 切 A 记录
 sa-dns ensure main --type A --value 1.1.1.1 --enable
 # dry-run
@@ -38,6 +39,8 @@ sa-dns ensure main --type A --value 1.1.1.1 --enable --dry-run
 sa-dns ensure main --type A --value 1.1.1.1 --enable --excl
 # 调整 ttl
 sa-dns ensure main --type A --value 1.1.1.1 --ttl 100 --enable
+# 批量切 CNAME 记录，常用于 CNAME 到 CDN 等操作
+sa-dns ensure main --type CNAME --value {domain}.h1.aqb.so. --enable
 
 # 查找子域记录
 sa-dns list -S music
@@ -46,11 +49,7 @@ sa-dns list -s aqb
 # 按正则查找子域（查看 aqb 的测试域名）
 sa-dns list | grep -E '^.*aqb\s'
 
-# 测试 aqb 测试域名
-sa-dns ensure aqb --type A --value 1.1.1.1 --enable --excl
-sa-dns ensure aqb --type CNAME --value {domain}.h1.aqb.so. --enable
-
-# 支持 -d,--domain 参数
+# 支持通过 -d,--domain 指定其他域名
 sa-dns -d dou.bz list
 ```
 
@@ -58,7 +57,28 @@ sa-dns -d dou.bz list
 
 ### sa-script
 
-TODO
+A remote script runner tool based on ansible. To use it, you need to prepare your ansible environment first.
+
+```shell
+$ echo 'uptime && echo $HOSTNAME $(whoami)' | sa-script test_zk
+Executing...
+100%|##################################################################################################################################################|Elapsed Time: 0:00:09
+
++----------+----+-------------------------------------------------------+--------+
+| host     | rc | stdout                                                | stderr |
++----------+----+-------------------------------------------------------+--------+
+| test-zk3 | 0  |  11:40:15 up 384 days, 19:00,  1 user,  load average: |        |
+|          |    | 0.16, 0.20, 0.26 test-zk3 user1                       |        |
+| test-zk2 | 0  |  11:40:15 up 392 days, 20:00,  1 user,  load average: |        |
+|          |    | 0.25, 0.22, 0.30 test-zk2 user1                       |        |
+| test-zk1 | 0  |  11:40:15 up 392 days, 23:53,  1 user,  load average: |        |
+|          |    | 0.30, 0.22, 0.25 test-zk1 user1                       |        |
++----------+----+-------------------------------------------------------+--------+
+```
+
+See `sa-script -h` for more details.
+
+TODO: add a gif to demonstrate.
 
 ### sa-access
 
@@ -81,9 +101,9 @@ icinga2 doc: <http://docs.icinga.org/icinga2/latest/doc/module/icinga2/toc>
 
 ```shell
 # try test
-sa-icinga notify --wechat lihan --email lihan@douban.com --test
+sa-icinga notify --wechat user1 --email user1@example.com --test
 
-sa-icinga notify --wechat user1 --email user1@douban.com  # need icinga pass os environment vars
+sa-icinga notify --wechat user1 --email user1@example.com  # need icinga pass os environment vars
 
 sa-icinga ack --host sa --service check-puppet --comment 'hehe'
 sa-icinga ack --host 'sa*' --service 'check-puppet'
@@ -116,4 +136,67 @@ sa-disk clean
 
 ### sa-bs
 
-TODO
+`sa-bs` 是对腾讯云 API/CLI 的封装，支持黑石、CVM 等产品。
+
+需要先安装并配置 [qcloudcli](https://github.com/QcloudApi/qcloudcli)。
+
+```shell
+sa-bs device list -j
+sa-bs device list -a alias
+sa-bs device list --alias host
+sa-bs vpc list -e createTime vpcId
+sa-bs vpc subnet
+sa-bs vpc subnet_ips --vpcId 1001 --subnetId 6555 -j
+sa-bs vpc subnet_ips --subnetName SA
+sa-bs vpc subnet_by_cpm_id --alias host22
+sa-bs eip list -a eip
+sa-bs lb list
+sa-bs -vvvv eip list --eipIds '[\\"eip-xxxxxxxx\\"]' -r
+sa-bs eip list --eip 1.1.1.1
+sa-bs vpc register_batch_ip --subnetName SA --ip 10.0.0.1
+sa-bs eip apply
+sa-bs eip bind_vpc_ip --eip 1.1.1.1 --vpcIp 10.0.0.1
+sa-bs vpc create_interface --alias host11 host22 --subnetName DBA-dummy
+sa-bs device reload_os --passwd XXXXXX --subnetName OfflineComputation --alias host88
+sa-bs device modify_alias --alias host33 --instanceId cpm-xxxxxxxx
+sa-bs -vvvv vpc create_subnet --subnetName Isolation-dummy --cidrBlock 10.0.1.0/24 --vlanId 2222
+
+## 机型组合
+sa-bs device list -e deviceClassCode
+sa-bs device os --deviceClassCode Y0-BS09v2 -a osNameDisplay osTypeId
+sa-bs device class_partition --cpuId 4 --diskNum1 2 --diskNum2 12 --diskTypeId1 1 --diskTypeId2 6 --haveRaidCard 0 --mem 64 --deviceClassCode "Y0-BS09v2"
+sa-bs device class_partition --cpuId 4 --diskNum1 2 --diskNum2 12 --diskTypeId1 1 --diskTypeId2 6 --haveRaidCard 0 --mem 64
+sa-bs device elastic_price --cpuId 4 --diskNum1 2 --diskNum2 12 --diskTypeId1 1 --diskTypeId2 6 --haveRaidCard 0 --mem 64
+sa-bs device inventory --cpuId 4 --diskNum1 2 --diskNum2 12 --diskTypeId1 1 --diskTypeId2 6 --haveRaidCard 0 --mem 64 --deviceClassCode "Y0-BS09v2" --subnetName OfflineComputation
+sa-bs device hardware_info --alias host11
+sa-bs device hardware_specification
+
+### 购买机器 ( see https://cloud.tencent.com/document/api/386/6638 )
+sa-bs device buy --goodsNum 2 --timeSpan 1 --timeUnit m --alias new_host \
+  --subnetName SA --ip 10.0.0.2 10.0.0.3 \
+  --cpuId 4 --diskNum1 2 --diskNum2 12 --diskTypeId1 1 --diskTypeId2 6 --haveRaidCard 0 --mem 64 \
+  --raidId 25 \
+  --deviceClassCode "Y0-BS09v2" --needSecurityAgent 0 --needMonitorAgent 0 --autoRenewFlag 1
+sa-bs device deploy_process --instanceId cpm-xxxxxxxx
+sa-bs device deploy_process --alias host11
+sa-bs device operation_log --alias host22
+
+## CVM
+
+sa-bs cvm instances
+```
+
+## Client
+
+Tools can be called from client as well.
+
+```python
+from sa_tools_core.client import Client
+
+c = Client()
+c.notify(wework='user1', content='hehe')
+c.uptime()
+c.dns.list(S='@')
+```
+
+See [sa_tools_core/client.py](sa_tools_core/client.py) for more details.
