@@ -39,7 +39,7 @@ cp local_config.py.example local_config.py
 vi local_config.py
 ```
 
-You can use a system-wide configuration path as well, by default it is `/etc/sa-tools/`, it can be configured via `CONFIG_DIR`.
+You can use a system-wide configuration path as well, by default it is `/etc/sa-tools/config.py`.
 
 Local configs will override [sa_tools_core/consts.py](sa_tools_core/consts.py).
 

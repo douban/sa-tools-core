@@ -6,20 +6,20 @@ from setuptools import setup, find_packages
 version = '0.1.0'
 
 
-# FIXME: We temporarily comment these direct url dependencies so that the project can be published to pypi
 requirements = [
     'setuptools',
     'six',
 
     # sa-notify
-    # 'wechat @ git+https://github.com/tclh123/wechat.git@py3k#egg=wechat-0.4.17',
-    'pycrypto',
+    'wechat3',
+    'requests',
 
     # sa-dns
-    # 'pydnspod @ git+https://github.com/tclh123/pydnspod.git@py3k#egg=pydnspod-0.0.3',
+    'pydnspod2',
 
     # sa-script
     'ansible>=2.8',
+    'paramiko',
     'progressbar2',
     'terminaltables',
 
@@ -32,7 +32,7 @@ requirements = [
     # sa-icinga
     'sentry-sdk',
     'Mako',
-    # 'icinga2-api @ git+https://github.com/tclh123/icinga2-api.git@master#egg=icinga2-api-0.1.0',
+    'icinga2py',
     'inflect',
 ]
 
