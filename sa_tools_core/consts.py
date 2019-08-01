@@ -16,14 +16,28 @@ IPMI_RETRIES = 1
 CONFIG_DIR = '/etc/sa-tools/'
 EXTERNAL_DOMAINS_CONFIG_FILE = CONFIG_DIR + '/external_domains'
 
+#######################################
+# # Notification (sa-notify related)
+#######################################
+
+# sa-node related, not used yet
 NODE_IRC_CHANNEL = '#sysadmin'
 NODE_SLACK_CHANNEL = '#sa'
 NODE_MAIL_TO = 'sa@example.com'
 
+# default mail from addr
 SYSADMIN_EMAIL = 'sysadmin@example.com'
 
+# SMTP server related
 SMTP_SERVER = ''
+# If port is zero, the standard port is used.
+SMTP_SERVER_PORT = 0
+# Indicate the config file name for SMTP credentials, e.g. /etc/sa-tools/email
+# SMTP_CREDENTIALS_CONFIG = 'email'
+SMTP_CREDENTIALS_CONFIG = ''
+SMTP_SSL = False
 
+# proxies for slack, etc.
 PROXIES = {
     "http": "http://gfw:2333",
     "https": "http://gfw:2333",
