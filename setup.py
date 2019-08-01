@@ -3,7 +3,7 @@
 from io import open
 from setuptools import setup, find_packages
 
-version = '0.1.1'
+version = '0.1.3'
 
 
 requirements = [
@@ -81,7 +81,7 @@ setup(name='sa-tools-core',
       keywords=['sa-tools', 'sysadmin', 'command line tools'],
       author='sysadmin',
       author_email='sysadmin@douban.com',
-      license='BSD License',
+      license='BSD',
       packages=find_packages(exclude=['examples*', 'tests*']),
       include_package_data=True,
       zip_safe=False,
