@@ -1,5 +1,7 @@
 # coding: utf-8
 
+from __future__ import print_function
+
 import os
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -102,6 +104,12 @@ BS_PLURAL_SUFFIX = ['s', 'List', 'Set']
 
 try:
     from local_config import *  # NOQA
-    exec(open(os.path.join(CONFIG_DIR, "config.py")).read())
 except Exception:
     pass
+
+try:
+    from io import open
+    config_path = os.path.join(CONFIG_DIR, "config.py")
+    exec(open(config_path, encoding='utf-8').read())
+except Exception:
+    print('WARNING: failed to load config %s.', config_path)

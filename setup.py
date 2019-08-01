@@ -19,7 +19,7 @@ requirements = [
 
     # sa-script
     'ansible>=2.8',
-    'paramiko',
+    # 'paramiko',  # sa-script use ssh by default
     'progressbar2',
     'terminaltables',
 

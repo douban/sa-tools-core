@@ -103,6 +103,8 @@ class DefaultRunnerCallbacks(CallbackBase):
 class Runner(object):
     def __init__(self, module_name='shell',
                  module_args=None,
+                 user=None,
+                 connection='ssh',
                  become=False,
                  callbacks=None,
                  run_hosts=None,
@@ -114,9 +116,10 @@ class Runner(object):
         run_hosts = [h.name if isinstance(h, Host) else h for h in run_hosts]
 
         # since the API is constructed for CLI it expects certain options to always be set in the context object
-        context.CLIARGS = ImmutableDict(connection='paramiko_ssh', module_path=ANSIBLE_MODULE_PATH,
+        context.CLIARGS = ImmutableDict(connection=connection, remote_user=user or C.DEFAULT_REMOTE_USER,
+                                        module_path=ANSIBLE_MODULE_PATH,
                                         forks=forks, become=become, become_method='sudo',
-                                        check=False, diff=False)
+                                        check=False, diff=False, verbosity=0)
 
         self.play = self._create_play(module_name, module_args, run_hosts)
 
