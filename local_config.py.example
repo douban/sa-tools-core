@@ -5,10 +5,6 @@
 # CONFIG_DIR = './config'
 # EXTERNAL_DOMAINS_CONFIG_FILE = CONFIG_DIR + '/external_domains'
 
-NODE_IRC_CHANNEL = '#sysadmin'
-NODE_SLACK_CHANNEL = '#sa'
-NODE_MAIL_TO = 'sa@example.com'
-
 SYSADMIN_EMAIL = 'sysadmin@example.com'
 ICINGA_EMAIL = 'icinga@example.com'
 

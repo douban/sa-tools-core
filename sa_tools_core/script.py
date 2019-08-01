@@ -57,6 +57,9 @@ class ScriptCLI(cmd.Cmd, object):
                         nargs='?', help='host pattern that ansible takes')
     parser.add_argument('-f', '--file', type=FileType('r'), dest='script',
                         default=sys.stdin, help='script file name')
+    parser.add_argument('-u', '--user', metavar='REMOTE_USER', help='connect as this user')
+    parser.add_argument('-c', '--connection', metavar='CONNECTION',
+                        default='ssh', help='connection type to use (default=%(default)s)')
     parser.add_argument('-s', '--sudo', action='store_true',
                         help='run operations with sudo')
     parser.add_argument('-F', '--forks', metavar='NUM', type=int,
@@ -119,6 +122,8 @@ sa-script [-h] [-s] [-f NUM] [-r NUM] [-R] [--host HOST] [--rc RC]
     def _run(self, args):
         self.runner = ScriptRunner(args.host_pattern,
                                    args.script,
+                                   args.user,
+                                   args.connection,
                                    args.sudo,
                                    args.retry,
                                    args.retry_failed,
@@ -390,7 +395,7 @@ class ScriptRunner(object):
     inventory = Inventory()
     editor = Editor(extension='.sh')
 
-    def __init__(self, host_pattern, script=sys.stdin, sudo=False,
+    def __init__(self, host_pattern, script=sys.stdin, user=None, connection='ssh', sudo=False,
                  retry=0, retry_failed=False, forks=DEFAULT_FORKS, compatible=False):
 
         self.host_pattern = host_pattern
@@ -406,6 +411,8 @@ class ScriptRunner(object):
         if not self.script:
             raise ScriptEmptyError
 
+        self.user = user
+        self.connection = connection
         self.sudo = sudo
         self.max_retries = retry
         self.retry_failed = retry_failed
@@ -427,6 +434,8 @@ class ScriptRunner(object):
         pbar.start()
         params = dict(module_name='shell',
                       module_args=self.script,
+                      user=self.user,
+                      connection=self.connection,
                       become=self.sudo,
                       callbacks=ScriptRunnerCallbacks(pbar),
                       run_hosts=run_hosts,
