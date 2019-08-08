@@ -189,13 +189,15 @@ def _query(args, es, start, doc_number=None):
 
 def parse_es_result(args, res):
     def as_string(s):
-        if args.agg_multi_y:
-            remote_addr_indexes = {i for i, field in enumerate(args.agg_multi_y)
-                                   if A.Y._alias_field(field) == 'remote_addr'}
-            sep = ' '
-            parts = s.split(sep)
-            s = sep.join(i2ip(p) if i in remote_addr_indexes else p for i, p in enumerate(parts))
         return s
+        # NOTE: the following code is for old elasticsearch
+        # if args.agg_multi_y:
+        #     remote_addr_indexes = {i for i, field in enumerate(args.agg_multi_y)
+        #                            if A.Y._alias_field(field) == 'remote_addr'}
+        #     sep = ' '
+        #     parts = s.split(sep)
+        #     s = sep.join(i2ip(p) if i in remote_addr_indexes else p for i, p in enumerate(parts))
+        # return s
 
     ret = {}
     if 'hits' in res.get('hits', {}):
@@ -278,6 +280,7 @@ def main():
     $ sa-access query -q 2.2.2.2 --term appname app1 -n 20
     $ sa-access query --term appname app1 remote_addr 2.2.2.2 -n 10
     $ sa-access query -q 'remote_addr:[1.1.1.0 TO 1.1.1.254]' -n10
+    $ sa-access query -q 'remote_addr:"1.1.1.0/24"' -n10
 
     ### aggs query
     $ sa-access query -x bandwidth
@@ -295,14 +298,17 @@ def main():
             --by-script "doc['remote_addr'].value + ' ' + doc['normalize_url'].value"
     ##### by ip and nurl
     $ sa-access query --term appname app1 -x count \
+            --by-script "def ip=doc['remote_addr'].value; \
+            + ip + ' ' + doc['normalize_url'].value"
+    ###### If you use old version elasticsearch, you will get ip in long integer, then you can do the following:
+    $ sa-access query --term appname app1 -x count \
             --by-script "def ip=doc['remote_addr'].value;(ip >>24) \
             + '.' + ((ip >> 16) % 256) + '.' + ((ip >> 8) % 256) \
             + '.' + (ip % 256) + ' ' + doc['normalize_url'].value"
     ##### by ip section and nurl
     $ sa-access query --term appname app1 -x count \
-            --by-script "def ip=doc['remote_addr'].value>>8;(ip >>24) \
-            + '.' + ((ip >> 16) % 256) + '.' + ((ip >> 8) % 256) \
-            + '.' + (ip % 256) + ' ' + doc['normalize_url'].value"
+            --by-script "def ip=doc['remote_addr'].value; \
+            + ip.substring(0, ip.lastIndexOf('.')) + ' ' + doc['normalize_url'].value"
 
     ## analyze
 
