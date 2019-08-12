@@ -136,7 +136,7 @@ sa-access query
 sa-access query --term ip 1.1.1.1
 sa-access query -t host example.com -x bandwidth --by ip
 sa-access query --term appname app1 -x count --by-script "doc['remote_addr'].value + ' ' + doc['normalize_url'].value"
-sa-access query --term appname app1 -x count --by-script "def ip=doc['remote_addr'].value;(ip >>24) + '.' + ((ip >> 16) % 256) + '.' + ((ip >> 8) % 256) + '.' + (ip % 256) + ' ' + doc['normalize_url'].value"
+sa-access query --term appname app1 -x count --by-script "def ip=doc['remote_addr'].value; ip.substring(0, ip.lastIndexOf('.')) + ' ' + doc['normalize_url'].value"
 sa-access analyze --term host example.com -x sum bytes_sent --by nurl -a '2017-03-28 09:30' -d 15 -b '2017-03-28 10:30'
 ```
 

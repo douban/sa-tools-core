@@ -12,7 +12,8 @@ import six
 from sa_tools_core.libs.permission import require_sa, require_user  # NOQA
 from sa_tools_core.libs.es import ESQuery
 from sa_tools_core.libs.timeformat import timeformat
-from sa_tools_core.consts import SA_ES_HOSTS, SA_ES_NGINX_ACCESS_INDEX_PREFIX, SA_ES_NGINX_ACCESS_DOC_TYPE
+from sa_tools_core.consts import (SA_ES_HOSTS, SA_ES_NGINX_ACCESS_INDEX_PREFIX,
+                                  SA_ES_NGINX_ACCESS_DOC_TYPE, SA_ES_VERSION)
 from sa_tools_core.utils import get_os_username, props, i2ip
 
 logger = logging.getLogger(__name__)
@@ -189,12 +190,14 @@ def _query(args, es, start, doc_number=None):
 
 def parse_es_result(args, res):
     def as_string(s):
-        if args.agg_multi_y:
-            remote_addr_indexes = {i for i, field in enumerate(args.agg_multi_y)
-                                   if A.Y._alias_field(field) == 'remote_addr'}
-            sep = ' '
-            parts = s.split(sep)
-            s = sep.join(i2ip(p) if i in remote_addr_indexes else p for i, p in enumerate(parts))
+        if SA_ES_VERSION < (3, 0, 0):
+            # the following code is for old elasticsearch, to translate ip format
+            if args.agg_multi_y:
+                remote_addr_indexes = {i for i, field in enumerate(args.agg_multi_y)
+                                       if A.Y._alias_field(field) == 'remote_addr'}
+                sep = ' '
+                parts = s.split(sep)
+                s = sep.join(i2ip(p) if i in remote_addr_indexes else p for i, p in enumerate(parts))
         return s
 
     ret = {}
@@ -278,6 +281,7 @@ def main():
     $ sa-access query -q 2.2.2.2 --term appname app1 -n 20
     $ sa-access query --term appname app1 remote_addr 2.2.2.2 -n 10
     $ sa-access query -q 'remote_addr:[1.1.1.0 TO 1.1.1.254]' -n10
+    $ sa-access query -q 'remote_addr:"1.1.1.0/24"' -n10
 
     ### aggs query
     $ sa-access query -x bandwidth
@@ -295,14 +299,17 @@ def main():
             --by-script "doc['remote_addr'].value + ' ' + doc['normalize_url'].value"
     ##### by ip and nurl
     $ sa-access query --term appname app1 -x count \
+            --by-script "def ip=doc['remote_addr'].value; \
+            ip + ' ' + doc['normalize_url'].value"
+    ###### If you use old version elasticsearch, you will get ip in long integer, then you can do the following:
+    $ sa-access query --term appname app1 -x count \
             --by-script "def ip=doc['remote_addr'].value;(ip >>24) \
             + '.' + ((ip >> 16) % 256) + '.' + ((ip >> 8) % 256) \
             + '.' + (ip % 256) + ' ' + doc['normalize_url'].value"
     ##### by ip section and nurl
     $ sa-access query --term appname app1 -x count \
-            --by-script "def ip=doc['remote_addr'].value>>8;(ip >>24) \
-            + '.' + ((ip >> 16) % 256) + '.' + ((ip >> 8) % 256) \
-            + '.' + (ip % 256) + ' ' + doc['normalize_url'].value"
+            --by-script "def ip=doc['remote_addr'].value; \
+            ip.substring(0, ip.lastIndexOf('.')) + ' ' + doc['normalize_url'].value"
 
     ## analyze
 
