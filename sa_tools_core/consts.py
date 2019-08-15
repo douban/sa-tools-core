@@ -127,4 +127,4 @@ try:
     config_path = os.path.join(CONFIG_DIR, "config.py")
     exec(open(config_path, encoding='utf-8').read())
 except Exception:
-    print('WARNING: failed to load config %s.', config_path)
+    print('WARNING: failed to load config %s.' % config_path)
