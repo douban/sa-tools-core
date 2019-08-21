@@ -101,26 +101,34 @@ class DefaultRunnerCallbacks(CallbackBase):
 
 
 class Runner(object):
-    def __init__(self, module_name='shell',
-                 module_args=None,
-                 user=None,
+    def __init__(self,
                  connection='ssh',
-                 become=False,
-                 callbacks=None,
-                 run_hosts=None,
-                 forks=1):
+                 module_path=None,                   # ex: /usr/share/ansible
+                 module_name='shell',
+                 module_args=None,
+                 forks=C.DEFAULT_FORKS,              # parallelism level
+                 pattern=None,                       # which hosts?  ex: 'all', 'acme.example.org'
+                 remote_user=C.DEFAULT_REMOTE_USER,  # ex: 'username'
+                 callbacks=None,                     # used for output
+                 run_hosts=None,                     # an optional list of pre-calculated hosts to run on, or host pattern
+                 become=False,                       # whether to run privelege escalation or not
+                 become_method=C.DEFAULT_BECOME_METHOD):
+
         self.callback = callbacks
 
-        if not isinstance(run_hosts, list):
-            run_hosts = [run_hosts]
-        run_hosts = [h.name if isinstance(h, Host) else h for h in run_hosts]
+        # find hosts that match the pattern
+        if not run_hosts:
+            run_hosts = pattern
+
+        if isinstance(run_hosts, list):
+            run_hosts = [h.name if isinstance(h, Host) else h for h in run_hosts]
 
         # since the API is constructed for CLI it expects certain options to always be set in the context object
-        context.CLIARGS = ImmutableDict(connection=connection, remote_user=user or C.DEFAULT_REMOTE_USER,
-                                        module_path=ANSIBLE_MODULE_PATH,
-                                        forks=forks, become=become, become_method='sudo',
+        context.CLIARGS = ImmutableDict(connection=connection, remote_user=remote_user,
+                                        module_path=module_path or ANSIBLE_MODULE_PATH,
+                                        forks=forks, become=become, become_method=become_method or 'sudo',
                                         check=False, diff=False, verbosity=0)
-
+        self.forks = forks
         self.play = self._create_play(module_name, module_args, run_hosts)
 
     @classmethod
@@ -150,6 +158,7 @@ class Runner(object):
                       loader=loader,
                       passwords=dict(),
                       stdout_callback=self.callback,  # Use our custom callback instead of the ``default`` callback plugin, which prints to stdout
+                      forks=self.forks,
                   )
             # most interesting data for a play is actually sent to the callback's methods
             result = tqm.run(self.play)  # NOQA

@@ -434,11 +434,11 @@ class ScriptRunner(object):
         pbar.start()
         params = dict(module_name='shell',
                       module_args=self.script,
-                      user=self.user,
+                      remote_user=self.user,
                       connection=self.connection,
                       become=self.sudo,
                       callbacks=ScriptRunnerCallbacks(pbar),
-                      run_hosts=run_hosts,
+                      run_hosts=host_pattern,
                       forks=self.forks)
         if ENABLE_DOA:
             params['try_direct'] = self.compatible
