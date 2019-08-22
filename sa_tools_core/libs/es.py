@@ -5,7 +5,7 @@ from __future__ import print_function
 import time
 from datetime import datetime
 
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, __version__ as es_client_version
 
 
 class ESQuery(object):
@@ -101,12 +101,14 @@ class ESQuery(object):
                               aggregations=aggregations, sort=sort)
         body = ESQuery._filter_None(body)
 
-        res = self.client.search(
-            index=indexes,
-            doc_type=self.doc_type,
-            size=size,
-            body=body,
-        )
+        params = dict(index=indexes,
+                      size=size,
+                      body=body)
+        # elasticsearch-py 7 no longer accepts 'doc_type' as a search parameter.
+        if es_client_version < (7, 0, 0):
+            params['doc_type'] = self.doc_type
+
+        res = self.client.search(**params)
         return res
 
 
