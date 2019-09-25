@@ -85,6 +85,8 @@ def ipv6_addr_to_tinydns_generic(ipv6_addr):
         rdata += '\\%03o' % int(part, 16)
     return rdata
 
+def to_unicode(s, encoding='utf-8', errors='strict'):
+    return six.ensure_text(s, encoding=encoding, errors=errors)
 
 def to_str(s, encoding='utf-8', errors='strict'):
     '''

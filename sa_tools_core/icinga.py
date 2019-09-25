@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import os
 import re
+import six
 import logging
 import argparse
 from pprint import pprint
@@ -62,16 +63,25 @@ def notify(args):
                 NAGIOS_NOTIFICATIONTYPE='PROBLEM',
                 NAGIOS_HOSTALIAS='sa',
                 NAGIOS_SERVICEDESC='fakeservice',
-                NAGIOS_SERVICEOUTPUT="don't panic",
+                NAGIOS_SERVICEOUTPUT="整个中文试试",
                 NAGIOS_SERVICESTATE='CRITICAL',
                 NOTIFICATIONAUTHORNAME='sysadmin',
-                NOTIFICATIONCOMMENT='what a naughty service.',
+                NOTIFICATIONCOMMENT='没病走两步~',
                 NOTIFICATION_IS_ARCHIVE=False,
                 NAGIOS_CONTACTNAME='shuaisa',
                 SERVICE_DURATION_SEC='5.001102',
                 )
            if args.test else os.environ)
-    env = AttrDict(env, _default_value='')
+
+    unicode_env = {}
+    for name, value in env.items():
+        if isinstance(value, six.string_types):
+            unicode_env[six.ensure_text(name)] = six.ensure_text(value)
+        else:
+            unicode_env[six.ensure_text(name)] = value
+
+    env = AttrDict(unicode_env, _default_value=six.u(''))
+
     short_env = dict(type=env.NAGIOS_NOTIFICATIONTYPE[:3].upper(),
                      host=env.NAGIOS_HOSTALIAS,
                      hoststate=env.HOSTSTATE,

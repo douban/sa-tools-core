@@ -4,7 +4,7 @@
 from mako.lookup import TemplateLookup
 
 from sa_tools_core.consts import PROJECT_ROOT
-from sa_tools_core.utils import to_str
+from sa_tools_core.utils import to_unicode
 
 
 TEMPLATES_DIR = PROJECT_ROOT + '/templates'
@@ -19,7 +19,7 @@ def render(template_name, strip_empty_lines=True, **data):
     out = lookup.get_template(template_name).render(**data)
     # When using Python 3, the render() method will return a bytes object, if output_encoding is set. Otherwise it returns
     # a string.
-    out = to_str(out)
+    out = to_unicode(out)
 
     if strip_empty_lines:
         return '\n'.join([('' if i.strip() == MAGIC_EMPTY_LINE_MARK else i)
