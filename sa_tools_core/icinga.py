@@ -15,7 +15,7 @@ from sa_tools_core.libs.icinga import get_icinga_api
 from sa_tools_core.libs.notification_gateway import add_notification
 from sa_tools_core.notify import NOTIFY_TYPES, Notifier
 from sa_tools_core.utils import get_os_username, AttrDict, plural, import_string
-from sa_tools_core.consts import ICINGA_EMAIL, ICINGA_CLUSTER_CONFIG_CLASS
+from sa_tools_core.consts import ICINGA_EMAIL, ICINGA_CLUSTER_CONFIG_CLASS, ALERT_WIKI_BASE_URL
 
 requests_logger = logging.getLogger('requests')
 
@@ -79,8 +79,9 @@ def notify(args):
                      time=' '.join(env.NAGIOS_LONGDATETIME.split()[:2]),
                      extra=(env.NAGIOS_HOSTOUTPUT if env.TARGET_TYPE == 'host'
                             else env.NAGIOS_SERVICEOUTPUT),
-                     link='')
-    duration = env.SERVICE_DURATION_SEC if env.TARGET_TYPE == 'service'\
+                     link='',
+                     wiki_base_url=ALERT_WIKI_BASE_URL.rstrip(' /'))
+    duration = env.SERVICE_DURATION_SEC if env.TARGET_TYPE == 'service' \
         else env.HOST_DURATION_SEC
 
     short_env = AttrDict(short_env, _default_value='')

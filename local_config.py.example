@@ -7,6 +7,11 @@
 SYSADMIN_EMAIL = 'sysadmin@example.com'
 ICINGA_EMAIL = 'icinga@example.com'
 
+# icinga alert page base url, every notify sent by sa-icinga will be attrtched with a wiki link
+# For example : http://yourwiki.com/alerts/sshd_down
+# Set to None or '' if you don't want it.
+ALERT_WIKI_BASE_URL = 'https://yourwiki.com/alerts'
+
 SMTP_SERVER = ''
 
 NCDU_EXPORT_DATA_PATH = "/data1"
