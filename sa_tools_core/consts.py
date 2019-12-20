@@ -86,8 +86,8 @@ SENTRY_DSN = ''
 
 # icinga alert page base url, every notify sent by sa-icinga will be attrtched with a wiki link
 # For example : http://yourwiki.com/alerts/sshd_down
-# Set to None or '' if you don't want it.
-ALERT_WIKI_BASE_URL = None
+# Set to '' if you don't want it.
+ALERT_WIKI_BASE_URL = ''
 
 # notification gateway is a web service that stores and analyizes notifications. We have one in douban, you can build
 # your own.
