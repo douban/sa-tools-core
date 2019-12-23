@@ -8,7 +8,7 @@ version = '0.1.5'
 
 requirements = [
     'setuptools',
-    'six',
+    'six>=1.12.0',
 
     # sa-notify
     'wechat3',
