@@ -13,7 +13,8 @@ from sa_tools_core.libs.permission import require_sa, require_user  # NOQA
 from sa_tools_core.libs.es import ESQuery
 from sa_tools_core.libs.timeformat import timeformat
 from sa_tools_core.consts import (SA_ES_HOSTS, SA_ES_NGINX_ACCESS_INDEX_PREFIX,
-                                  SA_ES_NGINX_ACCESS_DOC_TYPE, SA_ES_VERSION)
+                                  SA_ES_NGINX_ACCESS_DOC_TYPE, SA_ES_VERSION,
+                                  SA_ES_NGINX_ACCESS_TIMESTAMP_FIELD_NAME)
 from sa_tools_core.utils import get_os_username, props, i2ip
 
 logger = logging.getLogger(__name__)
@@ -27,10 +28,13 @@ N_DOC_DEFAULT = 10
 
 
 class NginxAccessESQuery(ESQuery):
-    def __init__(self, es_hosts=SA_ES_HOSTS, index_prefix=SA_ES_NGINX_ACCESS_INDEX_PREFIX,
-                 doc_type=SA_ES_NGINX_ACCESS_DOC_TYPE):
+    def __init__(self,
+                 es_hosts=SA_ES_HOSTS,
+                 index_prefix=SA_ES_NGINX_ACCESS_INDEX_PREFIX,
+                 doc_type=SA_ES_NGINX_ACCESS_DOC_TYPE,
+                 timestamp_field=SA_ES_NGINX_ACCESS_TIMESTAMP_FIELD_NAME):
         super(NginxAccessESQuery, self).__init__(es_hosts=es_hosts, index_prefix=index_prefix,
-                                                 doc_type=doc_type)
+                                                 doc_type=doc_type, timestamp_field=timestamp_field)
 
     def make_body(self, time_range=None, query_string=None, term_dict=None,
                   aggregations=None, sort=None,
@@ -138,7 +142,7 @@ class AggregationsUtils(object):
         bid = 'browser_id'
         nurl = 'normalize_url'
         dt = date_histogram = lambda interval: \
-            {'date_histogram': dict(field='Timestamp',
+            {'date_histogram': dict(field=SA_ES_NGINX_ACCESS_TIMESTAMP_FIELD_NAME,
                                     interval=interval, time_zone="Asia/Shanghai")}
         date_histogram_1s = date_histogram('1s')
 
@@ -170,8 +174,8 @@ def _query(args, es, start, doc_number=None):
     else:
         aggs = None
         doc_number = N_DOC_DEFAULT if doc_number is None else doc_number
-        sort = [{"Timestamp": dict(order="desc",
-                                   unmapped_type="boolean")}]
+        sort = [{SA_ES_NGINX_ACCESS_TIMESTAMP_FIELD_NAME: {'order': "desc",
+                                                           'unmapped_type': "boolean"}}]
 
     res = es.query(term_dict=term_dict,
                    aggregations=aggs,
