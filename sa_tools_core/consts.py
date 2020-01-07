@@ -52,6 +52,7 @@ SA_ES_VERSION = (6, 4, 0)
 SA_ES_NGINX_ACCESS_INDEX_PREFIX = 'heka-nginx.access-'
 SA_ES_NGINX_ACCESS_DOC_TYPE = 'nginx.access'
 SA_ES_NGINX_ACCESS_TIMESTAMP_FIELD_NAME = "Timestamp"
+SA_ES_NGINX_ACCESS_LOG_FIELD_NAME = "Payload"
 
 ########################
 # # DNS

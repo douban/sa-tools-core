@@ -14,7 +14,8 @@ from sa_tools_core.libs.es import ESQuery
 from sa_tools_core.libs.timeformat import timeformat
 from sa_tools_core.consts import (SA_ES_HOSTS, SA_ES_NGINX_ACCESS_INDEX_PREFIX,
                                   SA_ES_NGINX_ACCESS_DOC_TYPE, SA_ES_VERSION,
-                                  SA_ES_NGINX_ACCESS_TIMESTAMP_FIELD_NAME)
+                                  SA_ES_NGINX_ACCESS_TIMESTAMP_FIELD_NAME,
+                                  SA_ES_NGINX_ACCESS_LOG_FIELD_NAME)
 from sa_tools_core.utils import get_os_username, props, i2ip
 
 logger = logging.getLogger(__name__)
@@ -206,7 +207,7 @@ def parse_es_result(args, res):
 
     ret = {}
     if 'hits' in res.get('hits', {}):
-        ret['docs'] = [doc.get('_source', {}).get('Payload') for doc in res['hits']['hits']]
+        ret['docs'] = [doc.get('_source', {}).get(SA_ES_NGINX_ACCESS_LOG_FIELD_NAME) for doc in res['hits']['hits']]
     if 'aggregations' in res:
         my_aggs = res['aggregations'].get('my_aggs', {})
         buckets = my_aggs.get('buckets', [])
