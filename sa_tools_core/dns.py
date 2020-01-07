@@ -503,7 +503,7 @@ def dump(args):
 
     dnspod = DNSPod(domain=args.domain)
     records = dnspod.get_records()
-    records.sort(reverse=True)
+    records.sort(reverse=True, key=lambda x: x['id'])
 
     for record in records:
         name, type_, value, mx, ttl, enable = record['name'], record['type'], record['value'], \
