@@ -8,7 +8,7 @@ import logging
 import argparse
 import importlib
 import subprocess
-from functools import partial
+from functools import partial, reduce
 from collections import defaultdict
 
 from sa_tools_core.utils import get_os_username, jprint
@@ -112,9 +112,9 @@ def translate_param(args, param_key, new_params=None):
 def list2json(params):
     logger.debug('list2json(params=%s)', params)
     if len(params) == 1:
-        obj = params.values()[0]
+        obj = list(params.values())[0]
     else:
-        n = len(params.values()[0])
+        n = len(list(params.values())[0])
         assert all(len(v) == n for v in params.values())
         obj = [{k: v[i] for k, v in params.items() if v[i] is not None} for i in range(n)]
     if not obj:
