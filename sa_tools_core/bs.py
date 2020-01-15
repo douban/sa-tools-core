@@ -300,8 +300,8 @@ def _execute(mod_suffix, action, params):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = p.communicate()
     if p.returncode != 0 or stderr:
-        logger.error('CMD ERROR: %s', stderr)
-    return stdout
+        logger.error('CMD ERROR: %s', stderr.decode('utf-8'))
+    return stdout.decode('utf-8')
 
 
 def get_data_for_reduce(mod_suffix, action, params):
