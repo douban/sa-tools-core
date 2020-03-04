@@ -44,7 +44,7 @@ FIELDS_ORDER = ('host', 'stdout', 'stderr', 'rc')
 
 def get_wrap():
     t_width = int(subprocess.check_output(['tput', 'cols']).strip())
-    wrap_width = t_width / 3
+    wrap_width = int(t_width / 3)
     return TextWrapper(width=wrap_width).wrap
 
 
