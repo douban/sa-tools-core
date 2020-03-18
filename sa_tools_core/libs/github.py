@@ -184,7 +184,7 @@ def commit_github(org, repo, branch, files, message, retry=2):
     gh = GithubRepo(org, repo,
                     user_name=GITHUB_USERNAME, personal_token=GITHUB_PERSONAL_TOKEN, entrypoint=GITHUB_API_ENTRYPOINT)
     return_value = -1
-    for _ in retry + 1:
+    for _ in range(retry + 1):
         try:
             gh.update_files(branch, files, message)
             return_value = 0
