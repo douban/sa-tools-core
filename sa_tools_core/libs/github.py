@@ -42,8 +42,13 @@ class GithubRepo:
         :: return
         dict
         """
-        return self.make_request('GET', f"/repos/{self.org}/{self.repo}/contents/{path}",
+        try:
+            return self.make_request('GET', f"/repos/{self.org}/{self.repo}/contents/{path}",
                                  params={'ref': reference or 'master'})
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+                return None
+            raise e
 
     def get_reference(self, reference):
         return self.make_request('GET', f"/repos/{self.org}/{self.repo}/git/ref/heads/{reference}")
@@ -51,7 +56,7 @@ class GithubRepo:
     def get_commit(self, commit_sha):
         return self.make_request('GET', f"/repos/{self.org}/{self.repo}/git/commits/{commit_sha}")
 
-    def update_a_file(self, path, content, message, sha):
+    def update_a_file(self, path, content, message, sha=None):
         return self.make_request('PUT', f"/repos/{self.org}/{self.repo}/contents/{path}",
                                  data=json.dumps({
                                      'message': message,
@@ -115,8 +120,8 @@ class GithubRepo:
         files_sha = []
         # upload
         for path, content in files.items():
-            remote_content = self.get_file(path, reference=base_reference)
-            if remote_content['content'] == base64.encodebytes(content).decode():
+            base_file = self.get_file(path, reference=base_reference)
+            if base_file and base64.decodebytes(base_file['content'].encode()) == content:
                 logger.info(f'{path} unchange, ignored')
                 continue
             upload_result = self.upload_one_file(content)
@@ -134,6 +139,7 @@ class GithubRepo:
         base_branch = self.get_reference(base_reference)
         self.base_commit = self.get_commit(base_branch['object']['sha'])
         self.head_tree = self.create_tree(self.base_commit['tree']['sha'], files_sha)
+        return self.head_tree
 
     def commit(self, message):
         self.head_commit = self.create_commit(self.base_commit['sha'], self.head_tree['sha'], message)
@@ -159,15 +165,19 @@ class GithubRepo:
             path = list(files.keys())[0]
             content = files[path]
             base_file = self.get_file(path, reference=reference)
-            if base_file['content'] == base64.encodebytes(content).decode():
+            if not base_file:
+                self.update_a_file(path, content, message)
+            elif base64.decodebytes(base_file['content'].encode()) == content:
                 logger.info(f'{path} unchange, ignored')
             else:
-                self.update_a_file(path, content, message, base_file['sha'])
+                self.update_a_file(path, content, message, sha=base_file['sha'])
             return
 
-        self.add(files, reference)
-        self.commit(message)
-        self.push(reference)
+        add_result = self.add(files, reference)
+        if add_result:
+            # do not continue if add not successful
+            self.commit(message)
+            self.push(reference)
 
 
 def commit_github(org, repo, branch, files, message, retry=2):
