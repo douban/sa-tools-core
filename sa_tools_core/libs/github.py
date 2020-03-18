@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class GithubRepo:
-    def __init__(self, org, repo, entrypoint="https://github.intra.douban.com/api/v3",
+    def __init__(self, org, repo, entrypoint=None,
                  user_name=None, personal_token=None, author=None, skip_ssl=False):
         self.org = org
         self.repo = repo
@@ -37,10 +37,10 @@ class GithubRepo:
         """get content
         GET /repos/:owner/:repo/contents/:path
         :: params
-        reference: str 分支, tag 或 commit id, 默认获取repo 的默认分支
-        path: str 相对路径
+        reference: str branch, tag or commit id, default: default branch of repo
+        path: str relative path
         :: return
-        dict 文件内容在 content 内, 按照 encoding 的encoding 方法 encode.
+        dict
         """
         return self.make_request('GET', f"/repos/{self.org}/{self.repo}/contents/{path}",
                                  params={'ref': reference or 'master'})
@@ -60,7 +60,7 @@ class GithubRepo:
                                  }))
 
     def upload_one_file(self, content):
-        """ 用blobs 接口把文件上传到 github, 返回github 接口返回的字典, 相当于加入工作区
+        """
         POST /repos/:owner/:repo/git/blobs
         :: input
         {
@@ -81,7 +81,7 @@ class GithubRepo:
                                  }))
 
     def create_tree(self, base_tree, files):
-        """ 相当于加入 git 的索引 git add
+        """ equivalent to  git add
         """
         return self.make_request('POST', f"/repos/{self.org}/{self.repo}/git/trees",
                                  data=json.dumps({
@@ -90,7 +90,7 @@ class GithubRepo:
                                  }))
 
     def create_commit(self, base, tree, message):
-        """ 相当于 git commit
+        """ equivalent to git commit
         """
         return self.make_request('POST', f"/repos/{self.org}/{self.repo}/git/commits",
                                  data=json.dumps({
@@ -100,9 +100,8 @@ class GithubRepo:
                                  }))
 
     def update_reference(self, reference, commit_sha):
-        """ 相当于 git push
+        """ equivalent to git push
         PATCH /repos/:owner/:repo/git/refs/:ref
-        可能会产生 None fast farword 的错误
         """
         return self.make_request('PATCH', f"/repos/{self.org}/{self.repo}/git/refs/heads/{reference}",
                                  data=json.dumps({
@@ -145,12 +144,12 @@ class GithubRepo:
 
     def update_files(self, reference, files, message):
         """update reference
-        reference: str 分支, tag
+        reference: str branch, tag
         files: dict {file_path, filecontent}
             file_path -> str
             filecontent -> bytes
             example: {'example.md', b'Hello world', 'libs/example2.md', b'Hello world2'}
-        possible erros:
+        possible error:
         Web failed, timeout, 404, 403.
         None fast forward.
         No change.
@@ -172,7 +171,7 @@ class GithubRepo:
 
 
 def commit_github(org, repo, branch, files, message, retry=2):
-    """通过 Github API 更新某个repo的某个branch
+    """update files of a repo on a branch head.
     ::params:
         org: str
         repo: str
