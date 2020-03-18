@@ -124,6 +124,10 @@ BS_DEFAULT_PARAMS_BM = {
 }
 BS_PLURAL_SUFFIX = ['s', 'List', 'Set']
 
+GITHUB_USERNAME = 'your_name'
+GITHUB_PERSONAL_TOKEN = 'your_token'
+GITHUB_API_ENTRYPOINT = 'https://ghe.yourdomain.com/api/v3'
+
 try:
     from local_config import *  # NOQA
 except Exception:
