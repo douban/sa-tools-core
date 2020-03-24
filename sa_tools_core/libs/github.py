@@ -2,6 +2,7 @@ import requests
 import base64
 import json
 import logging
+import datetime
 from sa_tools_core.consts import (GITHUB_USERNAME, GITHUB_PERSONAL_TOKEN, GITHUB_API_ENTRYPOINT)
 
 logger = logging.getLogger(__name__)
@@ -104,6 +105,13 @@ class GithubRepo:
                                      'parents': [base]
                                  }))
 
+    def create_reference(self, reference, commit_sha):
+        return self.make_request('POST', f"/repos/{self.org}/{self.repo}/git/refs",
+                                 data=json.dumps({
+                                     'ref': f"refs/heads/{reference}",
+                                     'sha': commit_sha
+                                 }))
+
     def update_reference(self, reference, commit_sha):
         """ equivalent to git push
         PATCH /repos/:owner/:repo/git/refs/:ref
@@ -112,6 +120,24 @@ class GithubRepo:
                                  data=json.dumps({
                                      "sha": commit_sha,
                                      'force': False
+                                 }))
+
+    def create_pull_request(self, title, head, base, body='', maintainer_can_modify=True, draft=False, ):
+        return self.make_request('POST', f"/repos/{self.org}/{self.repo}/pulls",
+                                 data=json.dumps({
+                                     'title': title,
+                                     'head': head,
+                                     'base': base,
+                                     'body': body,
+                                     'maintainer_can_modify': maintainer_can_modify,
+                                     'draft': draft
+                                 }))
+
+    def merge_pull_request(self, pull_number, merge_method='merge'):
+        """merge method: `rebase`, `squash`, `merge`"""
+        return self.make_request('PUT', f"/repos/{self.org}/{self.repo}/pulls/{pull_number}/merge",
+                                 data=json.dumps({
+                                     'merge_method': merge_method
                                  }))
 
     # high level api starts here
@@ -146,7 +172,13 @@ class GithubRepo:
         logger.info('commit create: %s', self.head_commit['url'])
 
     def push(self, reference):
-        self.update_reference(reference, self.head_commit['sha'])
+        try:
+            self.update_reference(reference, self.head_commit['sha'])
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code != 422:
+                raise e
+        # error 422 , reference not exist, create reference
+        self.create_reference(reference, self.head_commit['sha'])
 
     def update_files(self, reference, files, message):
         """update reference
@@ -179,6 +211,27 @@ class GithubRepo:
             self.commit(message)
             self.push(reference)
 
+    def submit_pr(self, base_branch, files, title,
+                  body='', commit_message='', new_branch_name='',
+                  auto_merge=False, merge_method='merge'):
+        if not commit_message:
+            commit_message = "Update {}".format(', '.join(files.keys()))
+        if not new_branch_name:
+            new_branch_name = "patch-{}".format(datetime.datetime.now().strftime('%m-%d.%H.%M'))
+        add_result = self.add(files, base_branch)
+        if not add_result:
+            logger.info('Empty changelist, ignored')
+            return
+        # do not continue if add not successful
+        self.commit(commit_message)
+        self.push(new_branch_name)
+        created_pr = self.create_pull_request(title, new_branch_name, base_branch, body=body)
+        logger.info(f"PR create, url: {created_pr['html_url']}")
+        if auto_merge:
+            self.merge_pull_request(created_pr['number'], merge_method=merge_method)
+            logger.info('PR was successfully merged')
+        return created_pr
+
 
 def commit_github(org, repo, branch, files, message, retry=2):
     """update files of a repo on a branch head.
@@ -203,3 +256,9 @@ def commit_github(org, repo, branch, files, message, retry=2):
             logger.warning(e)
             logger.warning('Request failed , retrying')
     return return_value
+
+
+def submit_pr(org, repo, *args, **kwargs):
+    gh = GithubRepo(org, repo,
+                    user_name=GITHUB_USERNAME, personal_token=GITHUB_PERSONAL_TOKEN, entrypoint=GITHUB_API_ENTRYPOINT)
+    return gh.submit_pr(*args, **kwargs)
