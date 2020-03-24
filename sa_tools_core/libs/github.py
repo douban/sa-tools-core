@@ -3,6 +3,8 @@ import base64
 import json
 import logging
 import datetime
+from pathlib import Path, PurePath
+
 from sa_tools_core.consts import (GITHUB_USERNAME, GITHUB_PERSONAL_TOKEN, GITHUB_API_ENTRYPOINT)
 
 logger = logging.getLogger(__name__)
@@ -179,6 +181,24 @@ class GithubRepo:
                 raise e
         # error 422 , reference not exist, create reference
         self.create_reference(reference, self.head_commit['sha'])
+
+    def download(self, remote_path, local_path, reference='master'):
+        """download a folder recursively, only file and directory supported, """
+        file_or_dir = self.get_file(remote_path)
+        if isinstance(file_or_dir, dict):
+            # file, submodule, link, only file is supported now
+            if file_or_dir['type'] != 'file':
+                logger.warning('Only file and directory are supported, submodule and symlink are ignored.')
+                logger.warning(f"{file_or_dir['type']} ignored : {file_or_dir['path']}")
+                return
+            with open(local_path, 'wb') as fp:
+                fp.write(base64.decodebytes(
+                    file_or_dir['content'].encode()))
+        else:
+            # dir
+            Path(local_path).mkdir(parents=True, exist_ok=True)
+            for f in file_or_dir:
+                self.download(f['path'], PurePath(local_path).joinpath(f['name']), reference=reference)
 
     def update_files(self, reference, files, message):
         """update reference
