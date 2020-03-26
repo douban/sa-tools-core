@@ -63,7 +63,7 @@ class GithubRepo:
         return self.make_request('PUT', f"/repos/{self.org}/{self.repo}/contents/{path}",
                                  data=json.dumps({
                                      'message': message,
-                                     'content': base64.encodebytes(content).decode(),
+                                     'content': base64.b64encode(content).decode(),
                                      'sha': sha
                                  }))
 
@@ -84,7 +84,7 @@ class GithubRepo:
         """
         return self.make_request('POST', f"/repos/{self.org}/{self.repo}/git/blobs",
                                  data=json.dumps({
-                                     'content': base64.encodebytes(content).decode(),
+                                     'content': base64.b64encode(content).decode(),
                                      'encoding': 'base64'
                                  }))
 
@@ -149,7 +149,7 @@ class GithubRepo:
         # upload
         for path, content in files.items():
             base_file = self.get_file(path, reference=base_reference)
-            if base_file and base64.decodebytes(base_file['content'].encode()) == content:
+            if base_file and base64.b64decode(base_file['content'].encode()) == content:
                 logger.info(f'{path} unchange, ignored')
                 continue
             upload_result = self.upload_one_file(content)
@@ -192,7 +192,7 @@ class GithubRepo:
                 logger.warning(f"{file_or_dir['type']} ignored : {file_or_dir['path']}")
                 return
             with open(local_path, 'wb') as fp:
-                fp.write(base64.decodebytes(
+                fp.write(base64.b64decode(
                     file_or_dir['content'].encode()))
         else:
             # dir
@@ -219,7 +219,7 @@ class GithubRepo:
             base_file = self.get_file(path, reference=reference)
             if not base_file:
                 self.update_a_file(path, content, message)
-            elif base64.decodebytes(base_file['content'].encode()) == content:
+            elif base64.b64decode(base_file['content'].encode()) == content:
                 logger.info(f'{path} unchange, ignored')
             else:
                 self.update_a_file(path, content, message, sha=base_file['sha'])
