@@ -1,27 +1,23 @@
-.PHONY : clean_pyc new_venv install init test
+SHELL = bash
+
+.PHONY : clean_pyc install init test
 
 clean_pyc:
 	@find . -name "*.pyc" -exec rm {} +
 
-new_venv:
+venv:
 	@python3.7 -mvenv venv
-
-install:
-	@source venv/bin/activate; pip install -e .
-
-init: new_venv
 	@source venv/bin/activate; pip install --upgrade pip
-	$(MAKE) install
 
-new_venv2:
+install: venv
+	@source venv/bin/activate; pip install -e .[script]
+
+venv2:
 	@virtualenv venv2
-
-install2:
-	@source venv2/bin/activate; pip install -e .
-
-init2: new_venv2
 	@source venv2/bin/activate; pip install --upgrade pip
-	$(MAKE) install2
+
+install2: venv2
+	@source venv2/bin/activate; pip install -e .[script]
 
 test:
 	@python setup.py test
