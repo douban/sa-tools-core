@@ -177,10 +177,11 @@ class GithubRepo:
         try:
             self.update_reference(reference, self.head_commit['sha'])
         except requests.exceptions.HTTPError as e:
-            if e.response.status_code != 422:
+            if e.response.status_code == 422:
+                # error 422 , reference not exist, create reference
+                self.create_reference(reference, self.head_commit['sha'])
+            else:
                 raise e
-        # error 422 , reference not exist, create reference
-        self.create_reference(reference, self.head_commit['sha'])
 
     def download(self, remote_path, local_path, reference='master'):
         """download a folder recursively, only file and directory supported, """
