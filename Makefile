@@ -1,7 +1,7 @@
 .PHONY : clean install init test dist publish
 
 install:
-	@source venv/bin/activate; pip install -e .
+	@source venv/bin/activate; pip install -e .'[icinga,script,tencentcloud]'
 
 init: new_venv
 	@python -m venv venv

@@ -3,7 +3,7 @@
 from io import open
 from setuptools import setup, find_packages
 
-version = '0.2.2'
+version = '0.3.0'
 
 requirements = [
     'setuptools',
@@ -25,6 +25,13 @@ requirements = [
 
 # see also https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-extras-optional-features-with-their-own-dependencies  # NOQA
 extras_require = {
+    # sa-icinga
+    'icinga': [
+        'sentry-sdk',
+        'Mako',
+        'icinga2py',
+        'inflect',
+    ],
     # sa-script
     'script': [
         'ansible>=2.8',
@@ -32,29 +39,24 @@ extras_require = {
         'progressbar2',
         'terminaltables',
     ],
-    # sa-icinga
-    'icinga': [
-        'sentry-sdk',
-        'Mako',
-        'icinga2py',
-        'inflect',
-    ]
+    # sa-tc
+    'qcloud': ['tencentcloud-sdk-python'],
 }
 
 entry_points = """
-      [console_scripts]
-      sa-uptime = sa_tools_core.uptime:main
-      sa-dns = sa_tools_core.dns:main
-      sa-disk = sa_tools_core.disk:main
-      sa-notify = sa_tools_core.notify:main
-      sa-access = sa_tools_core.access:main
-      sa-bs = sa_tools_core.bs:main
-      sa-script = sa_tools_core.script:main [script]
-      sa-icinga = sa_tools_core.icinga:main [icinga]
-      # sa-lvs = sa_tools_core.lvs:main
-      # sa-rsync = sa_tools_core.rsync:main
-      # sa-node = sa_tools_core.node:main
-      """
+    [console_scripts]
+    sa-uptime = sa_tools_core.uptime:main
+    sa-dns = sa_tools_core.dns:main
+    sa-disk = sa_tools_core.disk:main
+    sa-notify = sa_tools_core.notify:main
+    sa-access = sa_tools_core.access:main
+    sa-icinga = sa_tools_core.icinga:main [icinga]
+    sa-script = sa_tools_core.script:main [script]
+    sa-tc = sa_tools_core.tc:main [tencentcloud]
+    # sa-node = sa_tools_core.node:main
+    # sa-lvs = sa_tools_core.lvs:main
+    # sa-rsync = sa_tools_core.rsync:main
+"""
 
 scripts = []
 

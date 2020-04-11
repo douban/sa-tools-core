@@ -16,7 +16,7 @@ pip install sa-tools-core
 
 ## Development Guide
 
-Currently support python2.7 ~ python3.7
+Currently support python3.7+
 
 ### Quick start
 
@@ -185,11 +185,9 @@ sa-disk clean
 
 [see more](docs/sa-disk.md)
 
-### sa-bs
+### sa-tc
 
-`sa-bs` 是对腾讯云 API/CLI 的封装，支持黑石、CVM 等产品。
-
-需要先安装并配置 [qcloudcli](https://github.com/QcloudApi/qcloudcli)。
+`sa-tc` 是对腾讯云 API 的封装，支持黑石、CVM 等产品。
 
 ```shell
 sa-bs device list -j
