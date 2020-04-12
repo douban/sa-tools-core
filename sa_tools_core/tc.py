@@ -11,10 +11,11 @@ import importlib
 from functools import partial
 from collections import defaultdict, namedtuple
 
-from sa_tools_core.consts import (
-    TENCENT_DEFAULT_PARAMS,
-    TENCENT_DEFAULT_REGIN,
-)
+import yaml
+import inflection
+
+from sa_tools_core.consts import TENCENT_DEFAULT_PARAMS, TENCENT_DEFAULT_REGIN
+
 from sa_tools_core.utils import get_config
 
 logger = logging.getLogger(__name__)
@@ -50,13 +51,7 @@ def simplify_action(action):
         .replace('LoadBalancer', 'Lb') \
         .replace('Ex', '') \
         .replace('Query', '')
-
-    action = ''.join(['_%s' % c.lower() if c.isupper() else c for c in action])[1:]
-    return action
-
-
-def simplify_param(param):
-    return ''.join(['_%s' % c.lower() if c.isupper() else c for c in param])[1:]
+    return inflection.underscore(action)
 
 
 def add_output_format_args(parser):
@@ -91,7 +86,7 @@ def extract_params(doc_str, models):
         m = RE_PARAM.match(line.strip())
         if not m:
             continue
-        pname = simplify_param(m.group(2))
+        pname = inflection.underscore(m.group(2))
         last_pname = pname
         params[pname]['name'] = m.group(2)
         if m.group(1) == 'param':
@@ -116,10 +111,10 @@ def param2parser(parser, param, info):
     '''
     translate param into parser
     '''
-    param_name = param.replace('_', '-')
+    param = inflection.dasherize(param)
     kw = {'help': info['desc']}
-    if param_name in TENCENT_DEFAULT_PARAMS.keys():
-        kw['default'] = TENCENT_DEFAULT_PARAMS[param_name]
+    if param in TENCENT_DEFAULT_PARAMS.keys():
+        kw['default'] = TENCENT_DEFAULT_PARAMS[param]
         kw['help'] += ' (default: %(default)s)'
     if info.get('multi', False):
         kw['nargs'] = '*'
@@ -133,7 +128,7 @@ def param2parser(parser, param, info):
     elif tname not in SPECIAL_PARAM_TYPES.keys():
         # NOTE:(everpcpc) if raised, add support for it
         raise Exception(f'param: {info["name"]} => {info["type"]} not yet supported')
-    parser.add_argument(f'--{param_name}', **kw)
+    parser.add_argument(f'--{param}', **kw)
 
 
 def arg2param(arg, param, info):
@@ -236,7 +231,6 @@ def execute_action(client, action, argv):
     elif args.format == 'json':
         print(json.dumps(simplified, ensure_ascii=False, indent=2))
     elif args.format == 'yaml':
-        import yaml
         print(yaml.dump(simplified, allow_unicode=True, indent=2))
 
 
