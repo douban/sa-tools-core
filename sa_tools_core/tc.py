@@ -258,7 +258,10 @@ def main():
 
     sa-tc bm devices -j
     sa-tc bm devices -a alias
-    sa-tc bm devices --alias brand
+    sa-tc bm devices --alias host
+
+    sa-tc vpc vpcs -e createTime [--vpc-ids vpc-xxxxxxxx]
+    sa-tc vpc subnets
 
     """
 
