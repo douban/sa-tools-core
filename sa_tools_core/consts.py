@@ -102,7 +102,7 @@ ICINGA_CACERT = '/etc/icinga2/ssl/certs/ca.pem'
 ICINGA_CLUSTER_CONFIG_CLASS = 'sa_tools_core.libs.icinga:IcingaClusterConfig'
 
 ########################
-# # TC(Tencent CLI)
+# # BS(blackstone CLI)
 ########################
 
 BS_CMD_PATTERN = 'qcloudcli "{module}" "{action}" {params}'
@@ -127,6 +127,10 @@ BS_DEFAULT_PARAMS_BM = {
     'zoneId': 1000800001,  # 可用区ID。可通过 DescribeRegions 接口用来获取黑石物理机可用区。
 }
 BS_PLURAL_SUFFIX = ['s', 'List', 'Set']
+
+########################
+# # TC(Tencent CLI)
+########################
 
 TENCENT_DEFAULT_REGIN = 'ap-beijing'
 TENCENT_DEFAULT_ATTRS = (

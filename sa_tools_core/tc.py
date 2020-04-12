@@ -12,10 +12,6 @@ from functools import partial
 from collections import defaultdict, namedtuple
 
 from sa_tools_core.consts import (
-    # BS_CMD_PATTERN,
-    # BS_DEFAULT_PARAMS,
-    # BS_DEFAULT_PARAMS_BM,
-    # BS_PLURAL_SUFFIX,
     TENCENT_DEFAULT_ATTRS,
     TENCENT_DEFAULT_PARAMS,
     TENCENT_DEFAULT_REGIN,
