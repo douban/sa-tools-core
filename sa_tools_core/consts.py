@@ -133,18 +133,6 @@ BS_PLURAL_SUFFIX = ['s', 'List', 'Set']
 ########################
 
 TENCENT_DEFAULT_REGIN = 'ap-beijing'
-TENCENT_DEFAULT_ATTRS = (
-    'alias',
-    'eipName',
-    'subnetName',
-    # 'vpcName', 'natName', 'instanceAlias',
-    # 'instanceId', 'vlanId', 'natUid', 'unInstanceId', 'subnetId',
-    'lanIp',
-    'vpcIp',
-    'eip',
-    'cidrBlock',
-    'cidr',
-)
 TENCENT_DEFAULT_PARAMS = {
     'limit': 10,
     'offset': 0,

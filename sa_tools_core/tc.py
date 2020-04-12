@@ -12,7 +12,6 @@ from functools import partial
 from collections import defaultdict, namedtuple
 
 from sa_tools_core.consts import (
-    TENCENT_DEFAULT_ATTRS,
     TENCENT_DEFAULT_PARAMS,
     TENCENT_DEFAULT_REGIN,
 )
@@ -64,13 +63,8 @@ def add_output_format_args(parser):
     parser.add_argument('-r', '--raw', action='store_true', help='raw output.')
     parser.add_argument('-j', '--json', action='store_true', help='json format output.')
     parser.add_argument('-s', '--sep', default=', ', help='separator, (default: %(default)s)')
-    parser.add_argument(
-        '-a',
-        '--attrs',
-        nargs='*',
-        default=list(TENCENT_DEFAULT_ATTRS),
-        help='the attrs that should be output. (default: %(default)s)')
-    parser.add_argument('-e', '--extra-attrs', nargs='*', help='the extra-attrs that should be output.')
+    parser.add_argument('-a', '--attrs', nargs='*', help='the attrs should only output')
+    parser.add_argument('-e', '--excludes', nargs='*', help='the extra-attrs that should not output.')
 
 
 def extract_params(doc_str, models):
@@ -144,9 +138,8 @@ def arg2param(arg, param, info):
         return SPECIAL_PARAM_TYPES[tname](arg)
 
 
-def simplify_output(output, _json=True, sep=', ', attrs=None, extra_attrs=None):
+def simplify_output(output, _json=True, sep=', ', attrs=(), excludes=()):
     data = json.loads(output)
-    attrs = set(attrs or [] + extra_attrs or [])
 
     def _simplify(data):
         if isinstance(data, list):
@@ -160,11 +153,17 @@ def simplify_output(output, _json=True, sep=', ', attrs=None, extra_attrs=None):
                 is_leaf = True
             if any(isinstance(i, (dict,)) for k, v in data.items() if isinstance(v, list) for i in v):
                 is_leaf = False
-            data = {k: _simplify(v) for k, v in data.items() if not is_leaf or k in attrs} or data
-            if not _json:
-                if is_leaf:
-                    data = sep.join([str(v) for k, v in data.items()])
+
+            if is_leaf:
+                if attrs:
+                    data = {k: v for k, v in data.items() if k in attrs}
                 else:
+                    data = {k: v for k, v in data.items() if k not in excludes}
+                if not _json:
+                    data = sep.join([str(v) for k, v in data.items()])
+            else:
+                data = {k: _simplify(v) for k, v in data.items()} or data
+                if not _json:
                     data = '\n'.join([
                         ('%s' if idx % 2 else '>> %s') % i for p in data.items() for idx, i in enumerate(p)
                     ])
@@ -212,7 +211,13 @@ def execute_action(client, action, argv):
     if args.raw:
         print(ret)
     else:
-        simplified = simplify_output(ret.to_json_string(), args.json, args.sep, args.attrs, args.extra_attrs)
+        simplified = simplify_output(
+            ret.to_json_string(),
+            args.json,
+            args.sep,
+            args.attrs or (),
+            args.excludes or (),
+        )
         if args.json:
             print(json.dumps(simplified, ensure_ascii=False, indent=4))
         else:
@@ -257,10 +262,10 @@ def main():
     e.g.
 
     sa-tc bm devices -j
-    sa-tc bm devices -a alias
+    sa-tc bm devices
     sa-tc bm devices --alias host
 
-    sa-tc vpc vpcs -e createTime [--vpc-ids vpc-xxxxxxxx]
+    sa-tc vpc vpcs [--vpc-ids vpc-xxxxxxxx]
     sa-tc vpc subnets
 
     """
