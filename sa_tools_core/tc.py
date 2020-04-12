@@ -60,9 +60,19 @@ def simplify_param(param):
 
 
 def add_output_format_args(parser):
-    parser.add_argument('-r', '--raw', action='store_true', help='raw output.')
-    parser.add_argument('-j', '--json', action='store_true', help='json format output.')
-    parser.add_argument('-s', '--sep', default=', ', help='separator, (default: %(default)s)')
+    parser.add_argument(
+        '-f',
+        '--format',
+        default='plain',
+        choices=('plain', 'json', 'yaml', 'raw'),
+        help='output format, (default: %(default)s)',
+    )
+    parser.add_argument(
+        '-s',
+        '--sep',
+        default=', ',
+        help='separator, only apply in plain output format (default: %(default)s)',
+    )
     parser.add_argument('-a', '--attrs', nargs='*', help='the attrs should only output')
     parser.add_argument('-e', '--excludes', nargs='*', help='the extra-attrs that should not output.')
 
@@ -110,6 +120,7 @@ def param2parser(parser, param, info):
     kw = {'help': info['desc']}
     if param_name in TENCENT_DEFAULT_PARAMS.keys():
         kw['default'] = TENCENT_DEFAULT_PARAMS[param_name]
+        kw['help'] += ' (default: %(default)s)'
     if info.get('multi', False):
         kw['nargs'] = '*'
     tname = info['type'].__name__
@@ -138,13 +149,13 @@ def arg2param(arg, param, info):
         return SPECIAL_PARAM_TYPES[tname](arg)
 
 
-def simplify_output(output, _json=True, sep=', ', attrs=(), excludes=()):
+def simplify_output(output, oformat, sep=', ', attrs=(), excludes=()):
     data = json.loads(output)
 
     def _simplify(data):
         if isinstance(data, list):
             data = [_simplify(i) for i in data]
-            if not _json:
+            if oformat == 'plain':
                 data = '\n'.join(sorted(i for i in data))
         elif isinstance(data, dict):
             is_leaf = False
@@ -159,11 +170,11 @@ def simplify_output(output, _json=True, sep=', ', attrs=(), excludes=()):
                     data = {k: v for k, v in data.items() if k in attrs}
                 else:
                     data = {k: v for k, v in data.items() if k not in excludes}
-                if not _json:
+                if oformat == 'plain':
                     data = sep.join([str(v) for k, v in data.items()])
             else:
                 data = {k: _simplify(v) for k, v in data.items()} or data
-                if not _json:
+                if oformat == 'plain':
                     data = '\n'.join([
                         ('%s' if idx % 2 else '>> %s') % i for p in data.items() for idx, i in enumerate(p)
                     ])
@@ -208,20 +219,25 @@ def execute_action(client, action, argv):
             req_params[info['name']] = arg2param(arg, param, info)
 
     ret = _execute(request_cls, client.cls, action, req_params)
-    if args.raw:
+
+    if args.format == 'raw':
         print(ret)
-    else:
-        simplified = simplify_output(
-            ret.to_json_string(),
-            args.json,
-            args.sep,
-            args.attrs or (),
-            args.excludes or (),
-        )
-        if args.json:
-            print(json.dumps(simplified, ensure_ascii=False, indent=4))
-        else:
-            print(simplified)
+        return
+
+    simplified = simplify_output(
+        ret.to_json_string(),
+        args.format,
+        args.sep,
+        args.attrs or (),
+        args.excludes or (),
+    )
+    if args.format == 'plain':
+        print(simplified)
+    elif args.format == 'json':
+        print(json.dumps(simplified, ensure_ascii=False, indent=2))
+    elif args.format == 'yaml':
+        import yaml
+        print(yaml.dump(simplified, allow_unicode=True, indent=2))
 
 
 def find_service_version(service):
@@ -261,8 +277,8 @@ def main():
     """
     e.g.
 
-    sa-tc bm devices -j
     sa-tc bm devices
+    sa-tc bm devices -f yaml
     sa-tc bm devices --alias host
     """
 
