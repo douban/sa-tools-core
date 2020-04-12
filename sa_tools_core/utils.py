@@ -6,7 +6,6 @@ import os
 import sys
 import six
 import pwd
-import json
 import socket
 import binascii
 import importlib
@@ -122,13 +121,6 @@ def props(cls):
 def i2ip(i):
     i = int(i)
     return '%s.%s.%s.%s' % ((i >> 24) % 256, (i >> 16) % 256, (i >> 8) % 256, i % 256)
-
-
-def jprint(obj):
-    ret = json.dumps(obj, ensure_ascii=False, indent=4)
-    # TODO:
-    ret = ret.encode('utf-8')
-    print(ret)
 
 
 def import_string(s):
