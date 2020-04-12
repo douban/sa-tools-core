@@ -16,7 +16,7 @@ pip install sa-tools-core
 
 ## Development Guide
 
-Currently support python3.7+
+Currently support python3.6+
 
 ### Quick start
 
