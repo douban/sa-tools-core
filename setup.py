@@ -3,7 +3,7 @@
 from io import open
 from setuptools import setup, find_packages
 
-version = '0.3.0'
+version = '0.3.1'
 
 requirements = [
     'setuptools',
@@ -43,6 +43,7 @@ extras_require = {
     'tencentcloud': [
         'tencentcloud-sdk-python',
         'PyYAML',
+        'inflection',
     ],
 }
 
