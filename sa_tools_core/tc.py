@@ -234,10 +234,10 @@ def execute_action(client, action, argv):
     if args.format == 'plain':
         print(simplified)
     elif args.format == 'json':
-        print(json.dumps(simplified, ensure_ascii=False, indent=4))
+        print(json.dumps(simplified, ensure_ascii=False, indent=2))
     elif args.format == 'yaml':
         import yaml
-        print(yaml.dump(simplified))
+        print(yaml.dump(simplified, allow_unicode=True, indent=2))
 
 
 def find_service_version(service):
