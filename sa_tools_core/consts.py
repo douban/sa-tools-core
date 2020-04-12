@@ -102,7 +102,7 @@ ICINGA_CACERT = '/etc/icinga2/ssl/certs/ca.pem'
 ICINGA_CLUSTER_CONFIG_CLASS = 'sa_tools_core.libs.icinga:IcingaClusterConfig'
 
 ########################
-# # BS(blackstone CLI)
+# # BS(Black Stone)
 ########################
 
 BS_CMD_PATTERN = 'qcloudcli "{module}" "{action}" {params}'
