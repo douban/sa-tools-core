@@ -105,14 +105,18 @@ ICINGA_CLUSTER_CONFIG_CLASS = 'sa_tools_core.libs.icinga:IcingaClusterConfig'
 # # BS(Black Stone)
 ########################
 
-BS_API_REQUESTS_MODULE_PREFIX = 'sa_tools_core.libs.qcloud.qcloudsdk'
 BS_CMD_PATTERN = 'qcloudcli "{module}" "{action}" {params}'
 BS_DEFAULT_ATTRS = (
-    'alias', 'eipName', 'subnetName',
+    'alias',
+    'eipName',
+    'subnetName',
     # 'vpcName', 'natName', 'instanceAlias',
     # 'instanceId', 'vlanId', 'natUid', 'unInstanceId', 'subnetId',
-    'lanIp', 'vpcIp', 'eip',
-    'cidrBlock', 'cidr',
+    'lanIp',
+    'vpcIp',
+    'eip',
+    'cidrBlock',
+    'cidr',
 )
 BS_DEFAULT_PARAMS = {
     'limit': 100,
@@ -123,6 +127,20 @@ BS_DEFAULT_PARAMS_BM = {
     'zoneId': 1000800001,  # 可用区ID。可通过 DescribeRegions 接口用来获取黑石物理机可用区。
 }
 BS_PLURAL_SUFFIX = ['s', 'List', 'Set']
+
+########################
+# # TC(Tencent CLI)
+########################
+
+TENCENT_DEFAULT_REGIN = 'ap-beijing'
+TENCENT_DEFAULT_PARAMS = {
+    'limit': 10,
+    'offset': 0,
+}
+
+########################
+# # Others
+########################
 
 GITHUB_USERNAME = 'your_name'
 GITHUB_PERSONAL_TOKEN = 'your_token'
