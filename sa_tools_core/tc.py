@@ -143,7 +143,7 @@ def _execute(req_cls, cli_cls, action, params):
 def execute_action(client, action, argv):
     models = importlib.import_module(f'tencentcloud.{client.service}.{client.version}.models')
     request_cls = getattr(models, f'{action}Request')
-    # NOTE:(everpcpc) extra params with action request document
+    # NOTE:(everpcpc) extract params with action request document
     params = extract_params(request_cls.__init__.__doc__, models)
 
     parser = argparse.ArgumentParser()
