@@ -21,19 +21,8 @@ from terminaltables import AsciiTable
 
 from sa_tools_core.libs.editor import Editor
 from sa_tools_core.utils import reverse_func
-from sa_tools_core.consts import ENABLE_DOA
 
-if ENABLE_DOA:
-    try:
-        # doa is the douban ansible wrapper which supports regions
-        from doa.callback import DOARunnerCallbacks as DefaultRunnerCallbacks
-        from doa.inventory import DOAInventory as Inventory
-        from doa.runner import DOAZoneRunner as Runner
-    except ImportError:
-        ENABLE_DOA = False
-if not ENABLE_DOA:
-    from sa_tools_core.libs.ansible import (DefaultRunnerCallbacks,  # NOQA
-                                            Inventory, Runner)  # NOQA
+from sa_tools_core.libs.ansible import DefaultRunnerCallbacks, Inventory, Runner
 
 logger = logging.getLogger(__name__)
 
@@ -53,33 +42,25 @@ class ScriptCLI(cmd.Cmd, object):
 
     parser = ArgumentParser()
 
-    parser.add_argument('host_pattern', metavar='<host-pattern>',
-                        nargs='?', help='host pattern that ansible takes')
-    parser.add_argument('-f', '--file', type=FileType('r'), dest='script',
-                        default=sys.stdin, help='script file name')
+    parser.add_argument('host_pattern', metavar='<host-pattern>', nargs='?', help='host pattern that ansible takes')
+    parser.add_argument('-f', '--file', type=FileType('r'), dest='script', default=sys.stdin, help='script file name')
     parser.add_argument('-u', '--user', metavar='REMOTE_USER', help='connect as this user')
-    parser.add_argument('-c', '--connection', metavar='CONNECTION',
-                        default='ssh', help='connection type to use (default=%(default)s)')
-    parser.add_argument('-s', '--sudo', action='store_true',
-                        help='run operations with sudo')
-    parser.add_argument('-F', '--forks', metavar='NUM', type=int,
-                        default=DEFAULT_FORKS, help='Level of parallelism')
-    parser.add_argument('-C', '--compatible', action='store_true',
-                        help='run in compatible mode, use ansible.runner instead of doa.runner as runner class')
-    parser.add_argument('-r', '--retry', metavar='NUM', type=int, default=0,
-                        help='Retry NUM times(dark only)')
-    parser.add_argument('-R', '--retry-failed', action='store_true',
-                        help='Also retry contacted_failed')
-    parser.add_argument('--host',
-                        help='filter results match the host pattern')
-    parser.add_argument('--rc',
-                        help='filter results match the rc pattern')
-    parser.add_argument('--stdout',
-                        help='filter results match the stdout pattern')
-    parser.add_argument('--stderr',
-                        help='filter results match the stderr pattern')
-    parser.add_argument('-q', '--quit', action='store_true',
-                        help='quit after script execute')
+    parser.add_argument(
+        '-c', '--connection', metavar='CONNECTION', default='ssh', help='connection type to use (default=%(default)s)')
+    parser.add_argument('-s', '--sudo', action='store_true', help='run operations with sudo')
+    parser.add_argument('-F', '--forks', metavar='NUM', type=int, default=DEFAULT_FORKS, help='Level of parallelism')
+    parser.add_argument(
+        '-C',
+        '--compatible',
+        action='store_true',
+        help='run in compatible mode, use ansible.runner instead of doa.runner as runner class')
+    parser.add_argument('-r', '--retry', metavar='NUM', type=int, default=0, help='Retry NUM times(dark only)')
+    parser.add_argument('-R', '--retry-failed', action='store_true', help='Also retry contacted_failed')
+    parser.add_argument('--host', help='filter results match the host pattern')
+    parser.add_argument('--rc', help='filter results match the rc pattern')
+    parser.add_argument('--stdout', help='filter results match the stdout pattern')
+    parser.add_argument('--stderr', help='filter results match the stderr pattern')
+    parser.add_argument('-q', '--quit', action='store_true', help='quit after script execute')
 
     def __init__(self):
         super(ScriptCLI, self).__init__()
@@ -120,15 +101,17 @@ sa-script [-h] [-s] [-f NUM] [-r NUM] [-R] [--host HOST] [--rc RC]
         sys.exit(0)
 
     def _run(self, args):
-        self.runner = ScriptRunner(args.host_pattern,
-                                   args.script,
-                                   args.user,
-                                   args.connection,
-                                   args.sudo,
-                                   args.retry,
-                                   args.retry_failed,
-                                   args.forks,
-                                   args.compatible)
+        self.runner = ScriptRunner(
+            args.host_pattern,
+            args.script,
+            args.user,
+            args.connection,
+            args.sudo,
+            args.retry,
+            args.retry_failed,
+            args.forks,
+            args.compatible,
+        )
 
         self.runner.run()
 
@@ -159,7 +142,8 @@ sa-script [-h] [-s] [-f NUM] [-r NUM] [-R] [--host HOST] [--rc RC]
                 print(e, file=sys.stderr)
 
     def help_run(self):
-        print("""
+        print(
+            """
 run new script and print result
 ================================
 (sa-script) $ run [host-pattern] [script filename] [args]
@@ -205,8 +189,7 @@ e.g.:
 
     def _output(self, data, cmd=None):
         if cmd:
-            pipe = Popen(cmd, shell=True,
-                         stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            pipe = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE)
             out, err = pipe.communicate(input=data)
 
             if out:
@@ -239,8 +222,7 @@ e.g.:
             if not table.ok:
                 # the table not fits within the terminal width
                 wrap = get_wrap()
-                data = [['\n'.join(wrap(i)) for i in item]
-                        for item in data]
+                data = [['\n'.join(wrap(i)) for i in item] for item in data]
                 table = AsciiTable(header + data)
 
             data = table.table
@@ -254,7 +236,8 @@ e.g.:
     do_p = do_print
 
     def help_print(self):
-        print("""
+        print(
+            """
 print marked results (and pipe to shell commands)
 ==================================================
 (sa-script) $ print [filed] [| shell commands]
@@ -313,25 +296,21 @@ e.g.:
         if reverse:
             pred_func = reverse_func(pred_func)
 
-        self.filter_args.append('{key}{r}{op}{pattern}'.format(key=key,
-                                                               r='!' if reverse else '',
-                                                               op=op,
-                                                               pattern=pattern))
+        self.filter_args.append(
+            '{key}{r}{op}{pattern}'.format(key=key, r='!' if reverse else '', op=op, pattern=pattern))
 
         try:
-            self.mark = {host: True
-                         for host, result in self.runner.results.items()
-                         if self.mark.get(host) and pred_func(result)}
+            self.mark = {
+                host: True for host, result in self.runner.results.items() if self.mark.get(host) and pred_func(result)
+            }
         except re.error as e:
             self.onecmd('reset')
             print(e, file=sys.stderr)
 
     def list_fields(self, *fields):
-        marked_results = [self.runner.results.get(k)
-                          for k, v in self.mark.items() if v]
+        marked_results = [self.runner.results.get(k) for k, v in self.mark.items() if v]
 
-        rtn = [[result.get(field, '') for field in fields]
-               for result in marked_results]
+        rtn = [[result.get(field, '') for field in fields] for result in marked_results]
 
         for field in FIELDS_ORDER:
             if field in fields:
@@ -354,7 +333,6 @@ filter {field} field
 
 
 class ScriptRunnerCallbacks(DefaultRunnerCallbacks):
-
     def __init__(self, pbar):
         self.pbar = pbar
         self.counter = Value('i', 0)
@@ -395,8 +373,18 @@ class ScriptRunner(object):
     inventory = Inventory()
     editor = Editor(extension='.sh')
 
-    def __init__(self, host_pattern, script=sys.stdin, user=None, connection='ssh', sudo=False,
-                 retry=0, retry_failed=False, forks=DEFAULT_FORKS, compatible=False):
+    def __init__(
+        self,
+        host_pattern,
+        script=sys.stdin,
+        user=None,
+        connection='ssh',
+        sudo=False,
+        retry=0,
+        retry_failed=False,
+        forks=DEFAULT_FORKS,
+        compatible=False,
+    ):
 
         self.host_pattern = host_pattern
 
@@ -432,16 +420,15 @@ class ScriptRunner(object):
         pbar = ProgressBar(widgets=widgets, max_value=len(run_hosts))
 
         pbar.start()
-        params = dict(module_name='shell',
-                      module_args=self.script,
-                      remote_user=self.user,
-                      connection=self.connection,
-                      become=self.sudo,
-                      callbacks=ScriptRunnerCallbacks(pbar),
-                      run_hosts=host_pattern,
-                      forks=self.forks)
-        if ENABLE_DOA:
-            params['try_direct'] = self.compatible
+        params = dict(
+            module_name='shell',
+            module_args=self.script,
+            remote_user=self.user,
+            connection=self.connection,
+            become=self.sudo,
+            callbacks=ScriptRunnerCallbacks(pbar),
+            run_hosts=host_pattern,
+            forks=self.forks)
         results = Runner(**params).run()
         pbar.finish()
         print()
@@ -465,10 +452,9 @@ class ScriptRunner(object):
         pred_func = pred_failed if self.retry_failed else pred_dark
 
         for i in range(self.max_retries):
-            need_retry = [host for host, result in self._results.items()
-                          if pred_func(result)]
+            need_retry = [host for host, result in self._results.items() if pred_func(result)]
 
-            print('Retrying {}...'.format(i+1))
+            print('Retrying {}...'.format(i + 1))
 
             results = self._run(':'.join(need_retry))
 
