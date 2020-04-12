@@ -9,13 +9,15 @@ import logging
 import argparse
 from pprint import pprint
 
+import inflect
+
 from sa_tools_core.libs.permission import require_user
 from sa_tools_core.libs.sentry import report, send_sentry
 from sa_tools_core.libs.template import render_notification
 from sa_tools_core.libs.icinga import get_icinga_api
 from sa_tools_core.libs.notification_gateway import add_notification
 from sa_tools_core.notify import NOTIFY_TYPES, Notifier
-from sa_tools_core.utils import get_os_username, AttrDict, plural, import_string
+from sa_tools_core.utils import get_os_username, AttrDict, import_string
 from sa_tools_core.consts import ICINGA_EMAIL, ICINGA_CLUSTER_CONFIG_CLASS, ALERT_WIKI_BASE_URL
 
 requests_logger = logging.getLogger('requests')
@@ -23,6 +25,8 @@ requests_logger = logging.getLogger('requests')
 logger = logging.getLogger(__name__)
 
 icinga_cluster_config = import_string(ICINGA_CLUSTER_CONFIG_CLASS)
+
+inflect_engine = inflect.engine()
 
 
 @require_user
@@ -33,9 +37,7 @@ def show(args):
         params['attrs'] = args.attrs
     if args.filter:
         params['filter'] = args.filter
-    res = (icinga_api.api.objects
-           .url(plural(args.type))
-           .get(**params))
+    res = (icinga_api.api.objects.url(inflect_engine.plural(args.type)).get(**params))
     if args.raw:
         print(res)
     else:
@@ -45,9 +47,8 @@ def show(args):
 @require_user
 def ack(args):
     icinga_api = get_icinga_api(icinga_cluster_config)
-    ret, msg = icinga_api.acknowledge(args.host, service=args.service,
-                                      author=args.user, comment=args.comment,
-                                      remove=args.remove, notify=args.notify)
+    ret, msg = icinga_api.acknowledge(
+        args.host, service=args.service, author=args.user, comment=args.comment, remove=args.remove, notify=args.notify)
     if ret:
         logger.info('icinga acknowledge %s/%s success: %s', args.host, args.service or '', msg)
     else:
@@ -58,20 +59,21 @@ def ack(args):
 @require_user
 def notify(args):
     notifier = Notifier(from_addr=ICINGA_EMAIL)
-    env = (dict(TARGET_TYPE='service',
-                NAGIOS_LONGDATETIME='2016-05-11 16:30:50 +8000',
-                NAGIOS_NOTIFICATIONTYPE='PROBLEM',
-                NAGIOS_HOSTALIAS='sa',
-                NAGIOS_SERVICEDESC='fakeservice',
-                NAGIOS_SERVICEOUTPUT="整个中文试试",
-                NAGIOS_SERVICESTATE='CRITICAL',
-                NOTIFICATIONAUTHORNAME='sysadmin',
-                NOTIFICATIONCOMMENT='没病走两步~',
-                NOTIFICATION_IS_ARCHIVE=False,
-                NAGIOS_CONTACTNAME='shuaisa',
-                SERVICE_DURATION_SEC='5.001102',
-                )
-           if args.test else os.environ)
+    env = (
+        dict(
+            TARGET_TYPE='service',
+            NAGIOS_LONGDATETIME='2016-05-11 16:30:50 +8000',
+            NAGIOS_NOTIFICATIONTYPE='PROBLEM',
+            NAGIOS_HOSTALIAS='sa',
+            NAGIOS_SERVICEDESC='fakeservice',
+            NAGIOS_SERVICEOUTPUT="整个中文试试",
+            NAGIOS_SERVICESTATE='CRITICAL',
+            NOTIFICATIONAUTHORNAME='sysadmin',
+            NOTIFICATIONCOMMENT='没病走两步~',
+            NOTIFICATION_IS_ARCHIVE=False,
+            NAGIOS_CONTACTNAME='shuaisa',
+            SERVICE_DURATION_SEC='5.001102',
+        ) if args.test else os.environ)
 
     unicode_env = {}
     for name, value in env.items():
@@ -82,15 +84,15 @@ def notify(args):
 
     env = AttrDict(unicode_env, _default_value=six.u(''))
 
-    short_env = dict(type=env.NAGIOS_NOTIFICATIONTYPE[:3].upper(),
-                     host=env.NAGIOS_HOSTALIAS,
-                     hoststate=env.HOSTSTATE,
-                     service=env.NAGIOS_SERVICEDESC,
-                     time=' '.join(env.NAGIOS_LONGDATETIME.split()[:2]),
-                     extra=(env.NAGIOS_HOSTOUTPUT if env.TARGET_TYPE == 'host'
-                            else env.NAGIOS_SERVICEOUTPUT),
-                     link='',
-                     wiki_base_url=ALERT_WIKI_BASE_URL.rstrip(' /'))
+    short_env = dict(
+        type=env.NAGIOS_NOTIFICATIONTYPE[:3].upper(),
+        host=env.NAGIOS_HOSTALIAS,
+        hoststate=env.HOSTSTATE,
+        service=env.NAGIOS_SERVICEDESC,
+        time=' '.join(env.NAGIOS_LONGDATETIME.split()[:2]),
+        extra=(env.NAGIOS_HOSTOUTPUT if env.TARGET_TYPE == 'host' else env.NAGIOS_SERVICEOUTPUT),
+        link='',
+        wiki_base_url=ALERT_WIKI_BASE_URL.rstrip(' /'))
     duration = env.SERVICE_DURATION_SEC if env.TARGET_TYPE == 'service' \
         else env.HOST_DURATION_SEC
 
@@ -106,17 +108,17 @@ def notify(args):
             if not addrs:
                 logger.warning('ignore empty %s addrs' % type_)
                 continue
-            title, content = render_notification(env=env,
-                                                 short_env=short_env,
-                                                 notify_type=type_,
-                                                 ack_link=ack_link,
-                                                 reboot_host_link=reboot_host_link,
-                                                 icinga_link=icinga_link)
+            title, content = render_notification(
+                env=env,
+                short_env=short_env,
+                notify_type=type_,
+                ack_link=ack_link,
+                reboot_host_link=reboot_host_link,
+                icinga_link=icinga_link)
             try:
-                ok = add_notification(env.NAGIOS_NOTIFICATIONTYPE,
-                                      short_env.host, short_env.hoststate,
-                                      short_env.service, content, type_,
-                                      ', '.join(addrs), duration)
+                ok = add_notification(
+                    env.NAGIOS_NOTIFICATIONTYPE, short_env.host, short_env.hoststate, short_env.service, content, type_,
+                    ', '.join(addrs), duration)
                 logger.info('notification gateway permit: %s', ok)
             except Exception:
                 # we catch the exception and send it to sentry, but let the program continue to run
@@ -152,8 +154,7 @@ def main():
     $ sa-icinga show --type user | grep lihan
     $ sa-icinga show --filter 'service.name == "check-puppet"' --attrs acknowledgement
     """
-    parser = argparse.ArgumentParser(epilog=main.__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(epilog=main.__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('-u', '--user', help='LDAP username, use your OS user name by default.')
     parser.add_argument('-v', '--verbose', help='Show more infomation.', action='store_true')
 
@@ -164,8 +165,7 @@ def main():
     notify_parser = subparsers.add_parser('notify', help='Notify.')
     notify_parser.add_argument('--test', action='store_true', help='test')
     for type_ in NOTIFY_TYPES:
-        notify_parser.add_argument('--%s' % type_, nargs='*',
-                                   help='your enterprise address of %s.' % type_)
+        notify_parser.add_argument('--%s' % type_, nargs='*', help='your enterprise address of %s.' % type_)
     notify_parser.set_defaults(func=notify)
     notify_parser.set_defaults(parser_name='notify')
 
@@ -189,8 +189,7 @@ def main():
     args = parser.parse_args()
     args.user = args.user or get_os_username()
 
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(name)s %(levelname)s %(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
     if not args.verbose:
         requests_logger.setLevel(logging.ERROR)

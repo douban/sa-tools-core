@@ -12,16 +12,12 @@ import binascii
 import importlib
 from functools import wraps
 
-import inflect
-
 from sa_tools_core.consts import CONFIG_DIR
 
 HOSTS_FILE = '/etc/hosts'
 HOSTS_WAN_FILE = '/etc/hosts.wan'
 
 ip_hostname_cache = {}
-
-inflect_engine = inflect.engine()
 
 
 def get_os_username():
@@ -34,8 +30,7 @@ def get_config(config_name):
             config = f.read()
     except IOError as e:
         if e.errno == 2:
-            print('Error: get config failed, you shall not execute this program on this machine!',
-                  file=sys.stderr)
+            print('Error: get config failed, you shall not execute this program on this machine!', file=sys.stderr)
             sys.exit(1)
         raise
     return config.strip()
@@ -70,23 +65,25 @@ def resolve_ip(ip):
 
 def reverse_func(f):
     """ reverse function Boolean result """
-
     @wraps(f)
     def wrapper(*args, **kwargs):
         return not f(*args, **kwargs)
+
     return wrapper
 
 
 def ipv6_addr_to_tinydns_generic(ipv6_addr):
     rdata = ''
     hexlify_ipv6_addr = binascii.hexlify(socket.inet_pton(socket.AF_INET6, ipv6_addr))
-    split_hexlify_ipv6_addr = [hexlify_ipv6_addr[i:i+2] for i in range(0, len(hexlify_ipv6_addr), 2)]
+    split_hexlify_ipv6_addr = [hexlify_ipv6_addr[i:i + 2] for i in range(0, len(hexlify_ipv6_addr), 2)]
     for part in split_hexlify_ipv6_addr:
         rdata += '\\%03o' % int(part, 16)
     return rdata
 
+
 def to_unicode(s, encoding='utf-8', errors='strict'):
     return six.ensure_text(s, encoding=encoding, errors=errors)
+
 
 def to_str(s, encoding='utf-8', errors='strict'):
     '''
@@ -124,10 +121,7 @@ def props(cls):
 
 def i2ip(i):
     i = int(i)
-    return '%s.%s.%s.%s' % ((i >> 24) % 256,
-                            (i >> 16) % 256,
-                            (i >> 8) % 256,
-                            i % 256)
+    return '%s.%s.%s.%s' % ((i >> 24) % 256, (i >> 16) % 256, (i >> 8) % 256, i % 256)
 
 
 def jprint(obj):
@@ -135,10 +129,6 @@ def jprint(obj):
     # TODO:
     ret = ret.encode('utf-8')
     print(ret)
-
-
-def plural(a):
-    return inflect_engine.plural(a)
 
 
 def import_string(s):
