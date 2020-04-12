@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import os
 import re
 import sys
 import json
@@ -164,7 +165,7 @@ def execute_action(client, action, argv):
     # NOTE:(everpcpc) extract params with action request document
     params = extract_params(request_cls.__init__.__doc__, models)
 
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(f'{os.path.basename(sys.argv[0])} {client.service} {action}')
     add_common_args(parser)
 
     for param, info in params.items():
@@ -190,7 +191,7 @@ def find_service_version(service):
 
 
 def execute_service(service, argv):
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(f'{os.path.basename(sys.argv[0])} {service}')
     subparsers = parser.add_subparsers(help='Subcommands', dest='action')
     subparsers.required = True
 
