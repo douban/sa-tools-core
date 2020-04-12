@@ -62,16 +62,9 @@ def simplify_param(param):
     return ''.join(['_%s' % c.lower() if c.isupper() else c for c in param])[1:]
 
 
-def add_common_args(parser):
+def add_output_format_args(parser):
     parser.add_argument('-r', '--raw', action='store_true', help='raw output.')
     parser.add_argument('-j', '--json', action='store_true', help='json format output.')
-    # parser.add_argument(
-    #     '-a',
-    #     '--attrs',
-    #     nargs='*',
-    #     default=list(BS_DEFAULT_ATTRS),
-    #     help='the attrs that should be output. (default: %(default)s)')
-    # parser.add_argument('-e', '--extra-attrs', nargs='*', help='the extra-attrs that should be output.')
     parser.add_argument('-s', '--sep', default=', ', help='separator, (default: %(default)s)')
 
 
@@ -144,6 +137,34 @@ def arg2param(arg, param, info):
         return SPECIAL_PARAM_TYPES[tname](arg)
 
 
+def simplify_output(output, _json=True, sep=', '):
+    data = json.loads(output)
+
+    def _simplify(data):
+        if isinstance(data, list):
+            data = [_simplify(i) for i in data]
+            if not _json:
+                data = '\n'.join(sorted(i for i in data))
+        elif isinstance(data, dict):
+            is_leaf = False
+            # NOTE: rough leaf determination
+            if not any(isinstance(v, (dict,)) for k, v in data.items()):
+                is_leaf = True
+            if any(isinstance(i, (dict,)) for k, v in data.items() if isinstance(v, list) for i in v):
+                is_leaf = False
+            data = {k: _simplify(v) for k, v in data.items() if not is_leaf} or data
+            if not _json:
+                if is_leaf:
+                    data = sep.join([str(v) for k, v in data.items()])
+                else:
+                    data = '\n'.join([
+                        ('%s' if idx % 2 else '>> %s') % i for p in data.items() for idx, i in enumerate(p)
+                    ])
+        return data
+
+    return _simplify(data)
+
+
 def _execute(req_cls, cli_cls, action, params):
     from tencentcloud.common import credential
     from tencentcloud.common.profile.http_profile import HttpProfile
@@ -166,7 +187,7 @@ def execute_action(client, action, argv):
     params = extract_params(request_cls.__init__.__doc__, models)
 
     parser = argparse.ArgumentParser(f'{os.path.basename(sys.argv[0])} {client.service} {action}')
-    add_common_args(parser)
+    add_output_format_args(parser)
 
     for param, info in params.items():
         param2parser(parser, param, info)
@@ -180,7 +201,14 @@ def execute_action(client, action, argv):
             req_params[info['name']] = arg2param(arg, param, info)
 
     ret = _execute(request_cls, client.cls, action, req_params)
-    print(ret)
+    if args.raw:
+        print(ret)
+    else:
+        simplified = simplify_output(ret.to_json_string(), args.json, args.sep)
+        if args.json:
+            print(json.dumps(simplified, ensure_ascii=False, indent=4))
+        else:
+            print(simplified)
 
 
 def find_service_version(service):
@@ -238,4 +266,5 @@ def main():
     level = logging.WARNING - args.verbose * 10
     logging.basicConfig(level=level, format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
+    # NOTE:(everpcpc) return code not parsed now
     sys.exit(execute_service(args.service, sys.argv[2:]))
