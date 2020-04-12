@@ -190,8 +190,8 @@ sa-disk clean
 `sa-tc` 是对腾讯云 API 的封装，支持黑石、CVM 等产品。
 
 ```shell
-sa-tc bm devices -j
 sa-tc bm devices
+sa-tc bm devices -f yaml
 sa-tc bm devices --alias host
 ```
 

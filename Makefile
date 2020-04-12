@@ -3,8 +3,8 @@
 install:
 	@source venv/bin/activate; pip install -e .'[script,icinga,tencentcloud]'
 
-init: new_venv
-	@python -m venv venv
+init:
+	@python3 -m venv venv
 	@source venv/bin/activate; pip install --upgrade pip
 	$(MAKE) install
 

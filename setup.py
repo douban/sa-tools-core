@@ -40,7 +40,10 @@ extras_require = {
         'inflect',
     ],
     # sa-tc
-    'tencentcloud': ['tencentcloud-sdk-python'],
+    'tencentcloud': [
+        'tencentcloud-sdk-python',
+        'PyYAML',
+    ],
 }
 
 entry_points = """
