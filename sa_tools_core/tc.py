@@ -7,6 +7,7 @@ import pkgutil
 import logging
 import argparse
 import importlib
+from functools import partial
 from collections import defaultdict, namedtuple
 
 from sa_tools_core.consts import (
@@ -25,15 +26,22 @@ tencent_config_func = lambda: get_config('tencent')  # NOQA
 ServiceClient = namedtuple('ServiceClient', ['service', 'version', 'cls'])
 
 RE_PARAM = re.compile(r'^:(param|type)\ (\w+):\ (.*)$')
-PARAM_TYPES = {
+COMMON_PARAM_TYPES = {
     'str': str,
     'int': int,
     'bool': bool,
 }
-SPECIAL_PARAM_TYPES = [
-    'Filter',
-    'Tag',
-]
+
+
+def kvs_arg_func(arg, kname, vname):
+    k, vs = arg.split('=')
+    return {kname: k, vname: vs.split(',')}
+
+
+SPECIAL_PARAM_TYPES = {
+    'Filter': partial(kvs_arg_func, kname='Name', vname='Values'),
+    'Tag': partial(kvs_arg_func, kname='TagKey', vname='TagValues'),
+}
 
 
 def simplify_action(action):
@@ -90,18 +98,18 @@ def extract_params(doc_str, models):
             if t.startswith('list of '):
                 params[pname]['multi'] = True
                 t = t[len('list of '):]
-            if t in SPECIAL_PARAM_TYPES:
+            if t in SPECIAL_PARAM_TYPES.keys():
                 params[pname]['type'] = getattr(models, t)
             else:
-                _t = PARAM_TYPES.get(t, None)
-                if _t:
-                    params[pname]['type'] = _t
+                ct = COMMON_PARAM_TYPES.get(t, None)
+                if ct:
+                    params[pname]['type'] = ct
                 else:
                     raise Exception(f'unkown param type {t} => {line.strip()}')
     return params
 
 
-def translate_param(parser, param, info):
+def param2parser(parser, param, info):
     '''
     translate param into parser
     '''
@@ -109,20 +117,30 @@ def translate_param(parser, param, info):
     kw = {'help': info['desc']}
     if info.get('multi', False):
         kw['nargs'] = '*'
-    if info['type'] in PARAM_TYPES.values():
-        if info['type'] == bool:
+    tname = info['type'].__name__
+    if tname in COMMON_PARAM_TYPES.keys():
+        if tname == 'bool':
             kw['action'] = 'store_true'
-        elif info['type'] == int:
+        elif tname == 'int':
             kw['type'] = int
-        parser.add_argument(f'--{param_name}', **kw)
-        return
     # param type in sdk
-    if info['name'] in SPECIAL_PARAM_TYPES:
-        pass
-    else:
+    elif tname not in SPECIAL_PARAM_TYPES.keys():
         # TODO:(everpcpc)
-        raise Exception(f'param: {info["name"]} => {info["type"]} not supported now')
+        raise Exception(f'param: {info["name"]} => {info["type"]} not yet supported')
     parser.add_argument(f'--{param_name}', **kw)
+
+
+def arg2param(arg, param, info):
+    '''
+    translate argument into request param
+    '''
+    tname = info['type'].__name__
+    if tname in COMMON_PARAM_TYPES.keys():
+        return arg
+    elif tname in SPECIAL_PARAM_TYPES.keys():
+        if info['multi']:
+            return [SPECIAL_PARAM_TYPES[tname](a) for a in arg]
+        return SPECIAL_PARAM_TYPES[tname](arg)
 
 
 def _execute(req_cls, cli_cls, action, params):
@@ -150,15 +168,15 @@ def execute_action(client, action, argv):
     add_common_args(parser)
 
     for param, info in params.items():
-        translate_param(parser, param, info)
+        param2parser(parser, param, info)
 
     args = parser.parse_args(argv)
 
     req_params = dict()
     for param, info in params.items():
-        a = getattr(args, param, None)
-        if a is not None:
-            req_params[info['name']] = a
+        arg = getattr(args, param, None)
+        if arg is not None:
+            req_params[info['name']] = arg2param(arg, param, info)
 
     ret = _execute(request_cls, client.cls, action, req_params)
     print(ret)
