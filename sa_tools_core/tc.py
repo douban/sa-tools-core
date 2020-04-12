@@ -109,7 +109,7 @@ def translate_param(parser, param, info):
     kw = {'help': info['desc']}
     if info.get('multi', False):
         kw['nargs'] = '*'
-    if info['type'] in [bool, int, str]:
+    if info['type'] in PARAM_TYPES.values():
         if info['type'] == bool:
             kw['action'] = 'store_true'
         elif info['type'] == int:
