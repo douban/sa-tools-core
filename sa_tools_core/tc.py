@@ -13,11 +13,12 @@ from collections import defaultdict, namedtuple
 
 from sa_tools_core.consts import (
     # BS_CMD_PATTERN,
-    # BS_DEFAULT_ATTRS,
     # BS_DEFAULT_PARAMS,
     # BS_DEFAULT_PARAMS_BM,
     # BS_PLURAL_SUFFIX,
-    TENCENT_DEFAULT_REGIN,)
+    TENCENT_DEFAULT_ATTRS,
+    TENCENT_DEFAULT_REGIN,
+)
 from sa_tools_core.utils import get_config
 
 logger = logging.getLogger(__name__)
@@ -66,6 +67,13 @@ def add_output_format_args(parser):
     parser.add_argument('-r', '--raw', action='store_true', help='raw output.')
     parser.add_argument('-j', '--json', action='store_true', help='json format output.')
     parser.add_argument('-s', '--sep', default=', ', help='separator, (default: %(default)s)')
+    parser.add_argument(
+        '-a',
+        '--attrs',
+        nargs='*',
+        default=list(TENCENT_DEFAULT_ATTRS),
+        help='the attrs that should be output. (default: %(default)s)')
+    parser.add_argument('-e', '--extra-attrs', nargs='*', help='the extra-attrs that should be output.')
 
 
 def extract_params(doc_str, models):
@@ -137,8 +145,9 @@ def arg2param(arg, param, info):
         return SPECIAL_PARAM_TYPES[tname](arg)
 
 
-def simplify_output(output, _json=True, sep=', '):
+def simplify_output(output, _json=True, sep=', ', attrs=None, extra_attrs=None):
     data = json.loads(output)
+    attrs = set(attrs or [] + extra_attrs or [])
 
     def _simplify(data):
         if isinstance(data, list):
@@ -152,7 +161,7 @@ def simplify_output(output, _json=True, sep=', '):
                 is_leaf = True
             if any(isinstance(i, (dict,)) for k, v in data.items() if isinstance(v, list) for i in v):
                 is_leaf = False
-            data = {k: _simplify(v) for k, v in data.items() if not is_leaf} or data
+            data = {k: _simplify(v) for k, v in data.items() if not is_leaf or k in attrs} or data
             if not _json:
                 if is_leaf:
                     data = sep.join([str(v) for k, v in data.items()])
@@ -204,7 +213,7 @@ def execute_action(client, action, argv):
     if args.raw:
         print(ret)
     else:
-        simplified = simplify_output(ret.to_json_string(), args.json, args.sep)
+        simplified = simplify_output(ret.to_json_string(), args.json, args.sep, args.attrs, args.extra_attrs)
         if args.json:
             print(json.dumps(simplified, ensure_ascii=False, indent=4))
         else:
@@ -247,6 +256,8 @@ def execute_service(service, argv):
 def main():
     """
     e.g.
+
+    sa-tc bm devices --limit 10 --offset 0 -j
 
     """
 
