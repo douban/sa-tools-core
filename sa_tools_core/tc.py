@@ -115,14 +115,14 @@ def translate_param(parser, param, info):
         elif info['type'] == int:
             kw['type'] = int
         parser.add_argument(f'--{param_name}', **kw)
+        return
+    # params in sdk
+    if info['name'] == 'Tags':
+        pass
     else:
-        if info['name'] == 'Tags':
-            pass
-        else:
-            # TODO:(everpcpc)
-            raise Exception(f'param: {info["name"]} => {info["type"]} not supported now')
-        parser.add_argument(f'--{param_name}', **kw)
-    pass
+        # TODO:(everpcpc)
+        raise Exception(f'param: {info["name"]} => {info["type"]} not supported now')
+    parser.add_argument(f'--{param_name}', **kw)
 
 
 def _execute(req_cls, cli_cls, action, params):
