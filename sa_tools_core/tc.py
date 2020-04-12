@@ -264,10 +264,6 @@ def main():
     sa-tc bm devices -j
     sa-tc bm devices
     sa-tc bm devices --alias host
-
-    sa-tc vpc vpcs [--vpc-ids vpc-xxxxxxxx]
-    sa-tc vpc subnets
-
     """
 
     parser = argparse.ArgumentParser(epilog=main.__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
