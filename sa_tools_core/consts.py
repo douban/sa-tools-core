@@ -141,6 +141,10 @@ TENCENT_DEFAULT_ATTRS = (
     'cidrBlock',
     'cidr',
 )
+TENCENT_DEFAULT_PARAMS = {
+    'limit': 10,
+    'offset': 0,
+}
 
 ########################
 # # Others

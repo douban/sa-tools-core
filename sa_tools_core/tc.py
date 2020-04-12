@@ -17,6 +17,7 @@ from sa_tools_core.consts import (
     # BS_DEFAULT_PARAMS_BM,
     # BS_PLURAL_SUFFIX,
     TENCENT_DEFAULT_ATTRS,
+    TENCENT_DEFAULT_PARAMS,
     TENCENT_DEFAULT_REGIN,
 )
 from sa_tools_core.utils import get_config
@@ -117,6 +118,8 @@ def param2parser(parser, param, info):
     '''
     param_name = param.replace('_', '-')
     kw = {'help': info['desc']}
+    if param_name in TENCENT_DEFAULT_PARAMS.keys():
+        kw['default'] = TENCENT_DEFAULT_PARAMS[param_name]
     if info.get('multi', False):
         kw['nargs'] = '*'
     tname = info['type'].__name__
@@ -257,7 +260,9 @@ def main():
     """
     e.g.
 
-    sa-tc bm devices --limit 10 --offset 0 -j
+    sa-tc bm devices -j
+    sa-tc bm devices -a alias
+    sa-tc bm devices --alias brand
 
     """
 
