@@ -15,3 +15,5 @@ local_config.py
 # Test
 /dist
 /build
+
+.vscode/
