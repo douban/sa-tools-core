@@ -117,7 +117,7 @@ def translate_param(parser, param, info):
         parser.add_argument(f'--{param_name}', **kw)
         return
     # param type in sdk
-    if info['name'] == 'Tags':
+    if info['name'] in SPECIAL_PARAM_TYPES:
         pass
     else:
         # TODO:(everpcpc)
