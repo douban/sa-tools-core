@@ -126,7 +126,7 @@ def param2parser(parser, param, info):
             kw['type'] = int
     # param type in sdk
     elif tname not in SPECIAL_PARAM_TYPES.keys():
-        # TODO:(everpcpc)
+        # NOTE:(everpcpc) if raised, add support for it
         raise Exception(f'param: {info["name"]} => {info["type"]} not yet supported')
     parser.add_argument(f'--{param_name}', **kw)
 
