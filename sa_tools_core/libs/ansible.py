@@ -44,7 +44,8 @@ inventory = InventoryManager(loader=loader, sources=ANSIBLE_INVENTORY_CONFIG_PAT
 
 Inventory = lambda: inventory  # NOQA
 
-# variable manager takes care of merging all the different sources to give you a unified view of variables available in each context
+# variable manager takes care of merging all the different sources
+# to give you a unified view of variables available in each context
 variable_manager = VariableManager(loader=loader, inventory=inventory)
 
 
@@ -101,18 +102,20 @@ class DefaultRunnerCallbacks(CallbackBase):
 
 
 class Runner(object):
-    def __init__(self,
-                 connection='ssh',
-                 module_path=None,                   # ex: /usr/share/ansible
-                 module_name='shell',
-                 module_args=None,
-                 forks=C.DEFAULT_FORKS,              # parallelism level
-                 pattern=None,                       # which hosts?  ex: 'all', 'acme.example.org'
-                 remote_user=C.DEFAULT_REMOTE_USER,  # ex: 'username'
-                 callbacks=None,                     # used for output
-                 run_hosts=None,                     # an optional list of pre-calculated hosts to run on, or host pattern
-                 become=False,                       # whether to run privelege escalation or not
-                 become_method=C.DEFAULT_BECOME_METHOD):
+    def __init__(
+        self,
+        connection='ssh',
+        module_path=None,  # ex: /usr/share/ansible
+        module_name='shell',
+        module_args=None,
+        forks=C.DEFAULT_FORKS,  # parallelism level
+        pattern=None,  # which hosts?  ex: 'all', 'acme.example.org'
+        remote_user=C.DEFAULT_REMOTE_USER,  # ex: 'username'
+        callbacks=None,  # used for output
+        run_hosts=None,  # an optional list of pre-calculated hosts to run on, or host pattern
+        become=False,  # whether to run privelege escalation or not
+        become_method=C.DEFAULT_BECOME_METHOD,
+    ):
 
         self.callback = callbacks
 
@@ -124,24 +127,30 @@ class Runner(object):
             run_hosts = [h.name if isinstance(h, Host) else h for h in run_hosts]
 
         # since the API is constructed for CLI it expects certain options to always be set in the context object
-        context.CLIARGS = ImmutableDict(connection=connection, remote_user=remote_user,
-                                        module_path=module_path or ANSIBLE_MODULE_PATH,
-                                        forks=forks, become=become, become_method=become_method or 'sudo',
-                                        check=False, diff=False, verbosity=0)
+        context.CLIARGS = ImmutableDict(
+            connection=connection,
+            remote_user=remote_user,
+            module_path=module_path or ANSIBLE_MODULE_PATH,
+            forks=forks,
+            become=become,
+            become_method=become_method or 'sudo',
+            check=False,
+            diff=False,
+            verbosity=0)
         self.forks = forks
         self.play = self._create_play(module_name, module_args, run_hosts)
 
     @classmethod
     def _create_play(cls, module_name, module_args, hosts):
-        # create data structure that represents our play, including tasks, this is basically what our YAML loader does internally.
+        # create data structure that represents our play,
+        # including tasks, this is basically what our YAML loader does internally.
         play_source = dict(
-                name="Ansible Play",
-                hosts=hosts,
-                gather_facts='no',
-                tasks=[
-                    dict(action=dict(module=module_name, args=module_args)),
-                 ]
-            )
+            name="Ansible Play",
+            hosts=hosts,
+            gather_facts='no',
+            tasks=[
+                dict(action=dict(module=module_name, args=module_args)),
+            ])
 
         # Create play object, playbook objects use .load instead of init or new methods,
         # this will also automatically create the task objects from the info provided in play_source
@@ -149,19 +158,21 @@ class Runner(object):
         return play
 
     def run(self):
-        # Run it - instantiate task queue manager, which takes care of forking and setting up all objects to iterate over host list and tasks
+        # Run it - instantiate task queue manager,
+        # which takes care of forking and setting up all objects to iterate over host list and tasks
         tqm = None
         try:
             tqm = TaskQueueManager(
-                      inventory=inventory,
-                      variable_manager=variable_manager,
-                      loader=loader,
-                      passwords=dict(),
-                      stdout_callback=self.callback,  # Use our custom callback instead of the ``default`` callback plugin, which prints to stdout
-                      forks=self.forks,
-                  )
+                inventory=inventory,
+                variable_manager=variable_manager,
+                loader=loader,
+                passwords=dict(),
+                stdout_callback=self.
+                callback,  # Use our custom callback instead of the ``default`` callback plugin, which prints to stdout
+                forks=self.forks,
+            )
             # most interesting data for a play is actually sent to the callback's methods
-            result = tqm.run(self.play)  # NOQA
+            _ = tqm.run(self.play)
         except Exception:
             raise
         finally:
