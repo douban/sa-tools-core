@@ -110,6 +110,7 @@ def param2parser(parser, param, info):
     kw = {'help': info['desc']}
     if param_name in TENCENT_DEFAULT_PARAMS.keys():
         kw['default'] = TENCENT_DEFAULT_PARAMS[param_name]
+        kw['help'] += ' (default: %(default)s)'
     if info.get('multi', False):
         kw['nargs'] = '*'
     tname = info['type'].__name__
