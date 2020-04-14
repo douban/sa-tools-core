@@ -54,6 +54,14 @@ def simplify_action(action):
     return inflection.underscore(action)
 
 
+def cleanup_help_message(msg):
+    return msg.replace(r"%", r"%%") \
+        .replace(r'<br>', '\n') \
+        .replace(r'<br/>', '\n') \
+        .replace(r'<li>', '\n  ') \
+        .replace(r'</li>', '\n')
+
+
 def add_output_format_args(parser):
     parser.add_argument(
         '-f',
@@ -81,7 +89,7 @@ def extract_params(doc_str, models):
     for line in doc_str.splitlines():
         # NOTE:(everpcpc) for multiline doc
         if (not line.startswith(" ")) and last_pname:
-            params[last_pname]['desc'] += line
+            params[last_pname]['desc'] += '\n' + cleanup_help_message(line)
 
         m = RE_PARAM.match(line.strip())
         if not m:
@@ -90,20 +98,27 @@ def extract_params(doc_str, models):
         last_pname = pname
         params[pname]['name'] = m.group(2)
         if m.group(1) == 'param':
-            params[pname]['desc'] = m.group(3)
+            params[pname]['desc'] = cleanup_help_message(m.group(3))
         elif m.group(1) == 'type':
             t = m.group(3)
             if t.startswith('list of '):
                 params[pname]['multi'] = True
                 t = t[len('list of '):]
-            if t in SPECIAL_PARAM_TYPES.keys():
+
+            if t in COMMON_PARAM_TYPES:
+                params[pname]['type'] = COMMON_PARAM_TYPES[t]
+            elif t in SPECIAL_PARAM_TYPES.keys():
                 params[pname]['type'] = getattr(models, t)
+            # NOTE: deal with internal class
+            elif t.startswith(':class:'):
+                _mod, _t = t[len(':class:'):].strip('`').rsplit('.', 1)
+                if _mod != models.__name__:
+                    raise Exception(f'param type in other models: {line.strip()}')
+                subparams = extract_params(getattr(models, _t).__init__.__doc__, models)
+                params[pname]['type'] = subparams
             else:
-                ct = COMMON_PARAM_TYPES.get(t, None)
-                if ct:
-                    params[pname]['type'] = ct
-                else:
-                    raise Exception(f'unkown param type {t} => {line.strip()}')
+                raise Exception(f'unkown param type {t} => {line.strip()}')
+
     return params
 
 
@@ -111,6 +126,12 @@ def param2parser(parser, param, info):
     '''
     translate param into parser
     '''
+    ptype = info['type']
+    if isinstance(ptype, dict):
+        for sp, si in ptype.items():
+            param2parser(parser, f'{param}_{sp}', si)
+        return
+
     param = inflection.dasherize(param)
     kw = {'help': info['desc']}
     if param in TENCENT_DEFAULT_PARAMS.keys():
