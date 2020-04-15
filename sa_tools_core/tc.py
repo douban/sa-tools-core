@@ -160,17 +160,32 @@ def param2parser(parser, param, info):
 
     param = inflection.dasherize(param)
     kw = {'help': cleanup_help_message(info.desc)}
-    if param in TENCENT_DEFAULT_PARAMS.keys():
-        kw['default'] = TENCENT_DEFAULT_PARAMS[param]
-        kw['help'] += ' (default: %(default)s)'
-    if info.multi:
-        kw['nargs'] = '*'
+
     tname = info.type.__name__
     if tname in COMMON_PARAM_TYPES.keys():
         if tname == 'bool':
-            kw['action'] = 'store_true'
-        elif tname == 'int':
-            kw['type'] = int
+            default_value = False
+            if param in TENCENT_DEFAULT_PARAMS.keys():
+                default_value = TENCENT_DEFAULT_PARAMS[param]
+            elif '默认取值：TRUE' in info.desc:
+                default_value = True
+
+            if default_value:
+                kw['action'] = 'store_false'
+            else:
+                kw['action'] = 'store_true'
+            kw['help'] += ' (default: %(default)s)'
+
+        else:
+            if tname == 'int':
+                kw['type'] = int
+            if info.multi:
+                kw['nargs'] = '*'
+
+            if param in TENCENT_DEFAULT_PARAMS.keys():
+                kw['default'] = TENCENT_DEFAULT_PARAMS[param]
+                kw['help'] += ' (default: %(default)s)'
+
     # param type in sdk
     elif tname not in SPECIAL_PARAM_TYPES.keys():
         # NOTE:(everpcpc) if raised, add support for it
