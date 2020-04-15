@@ -135,6 +135,8 @@ TENCENT_DEFAULT_REGIN = 'ap-beijing'
 TENCENT_DEFAULT_PARAMS = {
     'limit': 10,
     'offset': 0,
+    'enhanced_service_security_service_enabled': False,
+    'enhanced_service_monitor_service_enabled': False,
 }
 
 ########################
