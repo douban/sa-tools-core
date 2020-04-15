@@ -60,6 +60,8 @@ class HTMLFilter(HTMLParser):
             self.text += '\n➡️ '
         elif tag == 'br':
             self.text += '\n'
+        elif tag == 'p':
+            self.text += '\n'
 
     def handle_data(self, data):
         self.text += data
