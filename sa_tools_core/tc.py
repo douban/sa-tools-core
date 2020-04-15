@@ -58,8 +58,16 @@ def cleanup_help_message(msg):
     return msg.replace(r"%", r"%%") \
         .replace(r'<br>', '\n') \
         .replace(r'<br/>', '\n') \
-        .replace(r'<li>', '\n    ') \
+        .replace(r'<li>', '\n    ➡️') \
         .replace(r'</li>', '\n')
+
+
+class ParamInfo:
+    def __init__(self, name):
+        self.name = name
+        self.type = None
+        self.desc = None
+        self.multi = False
 
 
 def add_output_format_args(parser):
@@ -84,40 +92,42 @@ def extract_params(doc_str, models):
     '''
     extract params from doc string
     '''
-    params = defaultdict(dict)
+    params = dict()
     last_pname = ''
     for line in doc_str.splitlines():
         # NOTE:(everpcpc) for multiline doc
         if (not line.startswith(" ")) and last_pname:
-            params[last_pname]['desc'] += '\n' + cleanup_help_message(line)
+            params[last_pname].desc += '\n' + line
 
         m = RE_PARAM.match(line.strip())
         if not m:
             continue
-        pname = inflection.underscore(m.group(2))
-        last_pname = pname
-        params[pname]['name'] = m.group(2)
+        last_pname = pname = inflection.underscore(m.group(2))
+        pinfo = params.get(pname, None) or ParamInfo(m.group(2))
         if m.group(1) == 'param':
-            params[pname]['desc'] = cleanup_help_message(m.group(3))
+            pinfo.desc = m.group(3)
+            print(pinfo.desc)
         elif m.group(1) == 'type':
             t = m.group(3)
             if t.startswith('list of '):
-                params[pname]['multi'] = True
+                pinfo.multi = True
                 t = t[len('list of '):]
 
             if t in COMMON_PARAM_TYPES:
-                params[pname]['type'] = COMMON_PARAM_TYPES[t]
+                pinfo.type = COMMON_PARAM_TYPES[t]
             elif t in SPECIAL_PARAM_TYPES.keys():
-                params[pname]['type'] = getattr(models, t)
+                pinfo.type = getattr(models, t)
             # NOTE: deal with internal class
             elif t.startswith(':class:'):
                 _mod, _t = t[len(':class:'):].strip('`').rsplit('.', 1)
                 if _mod != models.__name__:
                     raise Exception(f'param type in other models: {line.strip()}')
                 subparams = extract_params(getattr(models, _t).__init__.__doc__, models)
-                params[pname]['type'] = subparams
+                pinfo.type = subparams
             else:
                 raise Exception(f'unkown param type {t} => {line.strip()}')
+
+        params[pname] = pinfo
 
     return params
 
@@ -126,20 +136,20 @@ def param2parser(parser, param, info):
     '''
     translate param into parser
     '''
-    ptype = info['type']
-    if isinstance(ptype, dict):
-        for sp, si in ptype.items():
+    if isinstance(info.type, dict):
+        for sp, si in info.type.items():
             param2parser(parser, f'{param}_{sp}', si)
         return
 
     param = inflection.dasherize(param)
-    kw = {'help': info['desc']}
+    print(info.__dict__)
+    kw = {'help': cleanup_help_message(info.desc)}
     if param in TENCENT_DEFAULT_PARAMS.keys():
         kw['default'] = TENCENT_DEFAULT_PARAMS[param]
         kw['help'] += ' (default: %(default)s)'
-    if info.get('multi', False):
+    if info.multi:
         kw['nargs'] = '*'
-    tname = info['type'].__name__
+    tname = info.type.__name__
     if tname in COMMON_PARAM_TYPES.keys():
         if tname == 'bool':
             kw['action'] = 'store_true'
@@ -148,16 +158,16 @@ def param2parser(parser, param, info):
     # param type in sdk
     elif tname not in SPECIAL_PARAM_TYPES.keys():
         # NOTE:(everpcpc) if raised, add support for it
-        raise Exception(f'param: {info["name"]} => {info["type"]} not yet supported')
+        raise Exception(f'param: {info.name} => {info.type} not yet supported')
     parser.add_argument(f'--{param}', **kw)
 
 
 def arg2param(arg, param, info):
-    tname = info['type'].__name__
+    tname = info.type.__name__
     if tname in COMMON_PARAM_TYPES.keys():
         return arg
     elif tname in SPECIAL_PARAM_TYPES.keys():
-        if info['multi']:
+        if info.multi:
             return [SPECIAL_PARAM_TYPES[tname](a) for a in arg]
         return SPECIAL_PARAM_TYPES[tname](arg)
     else:
@@ -170,14 +180,13 @@ def args2params(args, params, prefix=''):
     '''
     req_params = dict()
     for param, info in params.items():
-        ptype = info['type']
-        if isinstance(ptype, dict):
-            req_params[info['name']] = args2params(args, ptype, prefix=f'{prefix}{param}_')
+        if isinstance(info.type, dict):
+            req_params[info.name] = args2params(args, info.type, prefix=f'{prefix}{param}_')
             continue
 
         arg = getattr(args, f'{prefix}{param}', None)
         if arg is not None:
-            req_params[info['name']] = arg2param(arg, param, info)
+            req_params[info.name] = arg2param(arg, param, info)
 
     return req_params
 
@@ -237,7 +246,10 @@ def execute_action(client, action, argv):
     # NOTE:(everpcpc) extract params with action request document
     params = extract_params(request_cls.__init__.__doc__, models)
 
-    parser = argparse.ArgumentParser(f'{os.path.basename(sys.argv[0])} {client.service} {action}')
+    parser = argparse.ArgumentParser(
+        f'{os.path.basename(sys.argv[0])} {client.service} {action}',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     add_output_format_args(parser)
 
     for param, info in params.items():
@@ -276,7 +288,10 @@ def find_service_version(service):
 
 
 def execute_service(service, argv):
-    parser = argparse.ArgumentParser(f'{os.path.basename(sys.argv[0])} {service}')
+    parser = argparse.ArgumentParser(
+        f'{os.path.basename(sys.argv[0])} {service}',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     subparsers = parser.add_subparsers(help='Subcommands', dest='action')
     subparsers.required = True
 
@@ -294,7 +309,7 @@ def execute_service(service, argv):
         simple_action = simplify_action(method)
         mapping[simple_action] = method
         desc = getattr(client_cls, method).__doc__.split("\n\n")[0].strip()
-        subparsers.add_parser(simple_action, help=desc)
+        subparsers.add_parser(simple_action, help=cleanup_help_message(desc))
 
     args = parser.parse_args(argv[:1])
 
