@@ -158,7 +158,6 @@ def param2parser(parser, param, info):
             param2parser(parser, f'{param}_{sp}', si)
         return
 
-    param = inflection.dasherize(param)
     kw = {'help': cleanup_help_message(info.desc)}
 
     tname = info.type.__name__
@@ -190,7 +189,7 @@ def param2parser(parser, param, info):
     elif tname not in SPECIAL_PARAM_TYPES.keys():
         # NOTE:(everpcpc) if raised, add support for it
         raise Exception(f'param: {info.name} => {info.type} not yet supported')
-    parser.add_argument(f'--{param}', **kw)
+    parser.add_argument(f'--{inflection.dasherize(param)}', **kw)
 
 
 def arg2param(arg, param, info):
