@@ -8,8 +8,8 @@ import pkgutil
 import logging
 import argparse
 import importlib
+from html.parser import HTMLParser
 from functools import partial
-from collections import defaultdict, namedtuple
 
 import yaml
 import inflection
@@ -21,8 +21,6 @@ from sa_tools_core.utils import get_config
 logger = logging.getLogger(__name__)
 
 tencent_config_func = lambda: get_config('tencent')  # NOQA
-
-ServiceClient = namedtuple('ServiceClient', ['service', 'version', 'cls'])
 
 RE_PARAM = re.compile(r'^:(param|type)\ (\w+):\ (.*)$')
 COMMON_PARAM_TYPES = {
@@ -54,12 +52,30 @@ def simplify_action(action):
     return inflection.underscore(action)
 
 
+class HTMLFilter(HTMLParser):
+    text = ""
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'li':
+            self.text += '\n➡️ '
+        elif tag == 'br':
+            self.text += '\n'
+
+    def handle_data(self, data):
+        self.text += data
+
+
 def cleanup_help_message(msg):
-    return msg.replace(r"%", r"%%") \
-        .replace(r'<br>', '\n') \
-        .replace(r'<br/>', '\n') \
-        .replace(r'<li>', '\n    ➡️') \
-        .replace(r'</li>', '\n')
+    f = HTMLFilter()
+    f.feed(msg)
+    return f.text.replace(r"%", r"%%").replace('\n\n', '\n')
+
+
+class ServiceClient:
+    def __init__(self, service, version, cls_):
+        self.service = service
+        self.version = version
+        self.cls = cls_
 
 
 class ParamInfo:
@@ -106,7 +122,6 @@ def extract_params(doc_str, models):
         pinfo = params.get(pname, None) or ParamInfo(m.group(2))
         if m.group(1) == 'param':
             pinfo.desc = m.group(3)
-            print(pinfo.desc)
         elif m.group(1) == 'type':
             t = m.group(3)
             if t.startswith('list of '):
@@ -142,7 +157,6 @@ def param2parser(parser, param, info):
         return
 
     param = inflection.dasherize(param)
-    print(info.__dict__)
     kw = {'help': cleanup_help_message(info.desc)}
     if param in TENCENT_DEFAULT_PARAMS.keys():
         kw['default'] = TENCENT_DEFAULT_PARAMS[param]
@@ -248,7 +262,7 @@ def execute_action(client, action, argv):
 
     parser = argparse.ArgumentParser(
         f'{os.path.basename(sys.argv[0])} {client.service} {action}',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=argparse.RawTextHelpFormatter,
     )
     add_output_format_args(parser)
 
