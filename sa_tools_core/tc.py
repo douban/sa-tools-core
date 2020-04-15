@@ -58,7 +58,7 @@ def cleanup_help_message(msg):
     return msg.replace(r"%", r"%%") \
         .replace(r'<br>', '\n') \
         .replace(r'<br/>', '\n') \
-        .replace(r'<li>', '\n  ') \
+        .replace(r'<li>', '\n    ') \
         .replace(r'</li>', '\n')
 
 
@@ -153,9 +153,6 @@ def param2parser(parser, param, info):
 
 
 def arg2param(arg, param, info):
-    '''
-    translate argument into request param
-    '''
     tname = info['type'].__name__
     if tname in COMMON_PARAM_TYPES.keys():
         return arg
@@ -163,6 +160,26 @@ def arg2param(arg, param, info):
         if info['multi']:
             return [SPECIAL_PARAM_TYPES[tname](a) for a in arg]
         return SPECIAL_PARAM_TYPES[tname](arg)
+    else:
+        raise Exception('param {param} not supported: {info}')
+
+
+def args2params(args, params, prefix=''):
+    '''
+    translate argument into request param
+    '''
+    req_params = dict()
+    for param, info in params.items():
+        ptype = info['type']
+        if isinstance(ptype, dict):
+            req_params[info['name']] = args2params(args, ptype, prefix=f'{prefix}{param}_')
+            continue
+
+        arg = getattr(args, f'{prefix}{param}', None)
+        if arg is not None:
+            req_params[info['name']] = arg2param(arg, param, info)
+
+    return req_params
 
 
 def simplify_output(output, oformat, sep=', ', attrs=(), excludes=()):
@@ -228,11 +245,10 @@ def execute_action(client, action, argv):
 
     args = parser.parse_args(argv)
 
-    req_params = dict()
-    for param, info in params.items():
-        arg = getattr(args, param, None)
-        if arg is not None:
-            req_params[info['name']] = arg2param(arg, param, info)
+    print(args)
+    req_params = args2params(args, params)
+    print(req_params)
+    exit(0)
 
     ret = _execute(request_cls, client.cls, action, req_params)
 
