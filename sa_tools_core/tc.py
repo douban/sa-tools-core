@@ -161,6 +161,8 @@ def param2parser(parser, param, info):
     kw = {'help': cleanup_help_message(info.desc)}
 
     tname = info.type.__name__
+    if info.multi:
+        kw['nargs'] = '*'
     if tname in COMMON_PARAM_TYPES.keys():
         if tname == 'bool':
             default_value = False
@@ -178,8 +180,6 @@ def param2parser(parser, param, info):
         else:
             if tname == 'int':
                 kw['type'] = int
-            if info.multi:
-                kw['nargs'] = '*'
 
             if param in TENCENT_DEFAULT_PARAMS.keys():
                 kw['default'] = TENCENT_DEFAULT_PARAMS[param]
