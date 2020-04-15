@@ -245,10 +245,7 @@ def execute_action(client, action, argv):
 
     args = parser.parse_args(argv)
 
-    print(args)
     req_params = args2params(args, params)
-    print(req_params)
-    exit(0)
 
     ret = _execute(request_cls, client.cls, action, req_params)
 
