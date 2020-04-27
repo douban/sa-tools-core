@@ -38,6 +38,7 @@ def kvs_arg_func(arg, kname, vname):
 SPECIAL_PARAM_TYPES = {
     'Filter': partial(kvs_arg_func, kname='Name', vname='Values'),
     'Tag': partial(kvs_arg_func, kname='TagKey', vname='TagValues'),
+    'DeviceAlias': partial(kvs_arg_func, kname='InstanceId', vname='Alias'),
 }
 
 
