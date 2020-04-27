@@ -29,7 +29,7 @@ COMMON_PARAM_TYPES = {
 }
 
 
-class SpecialParam:
+class KVParamType:
     def __init__(self, kname, vname, multi_value=False):
         self.kname = kname
         self.vname = vname
@@ -48,9 +48,9 @@ class SpecialParam:
 
 
 SPECIAL_PARAM_TYPES = {
-    'Filter': SpecialParam('Name', 'Values', True),
-    'Tag': SpecialParam('TagKey', 'TagValues', True),
-    'DeviceAlias': SpecialParam('InstanceId', 'Alias', False),
+    'Filter': KVParamType('Name', 'Values', True),
+    'Tag': KVParamType('TagKey', 'TagValues', True),
+    'DeviceAlias': KVParamType('InstanceId', 'Alias', False),
 }
 
 
