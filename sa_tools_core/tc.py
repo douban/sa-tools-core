@@ -9,7 +9,6 @@ import logging
 import argparse
 import importlib
 from html.parser import HTMLParser
-from functools import partial
 
 import yaml
 import inflection
@@ -30,15 +29,28 @@ COMMON_PARAM_TYPES = {
 }
 
 
-def kvs_arg_func(arg, kname, vname):
-    k, vs = arg.split('=')
-    return {kname: k, vname: vs.split(',')}
+class KVParamType:
+    def __init__(self, kname, vname, multi_value=False):
+        self.kname = kname
+        self.vname = vname
+        self.multi_value = multi_value
+
+    def parse_value(self, arg):
+        k, v = arg.split('=')
+        return {self.kname: k, self.vname: v.split(',') if self.multi_value else v}
+
+    @property
+    def help_message(self):
+        if self.multi_value:
+            return f'\npattern: {self.kname}={self.vname},{self.vname}...'
+        else:
+            return f'\npattern: {self.kname}={self.vname}'
 
 
 SPECIAL_PARAM_TYPES = {
-    'Filter': partial(kvs_arg_func, kname='Name', vname='Values'),
-    'Tag': partial(kvs_arg_func, kname='TagKey', vname='TagValues'),
-    'DeviceAlias': partial(kvs_arg_func, kname='InstanceId', vname='Alias'),
+    'Filter': KVParamType('Name', 'Values', True),
+    'Tag': KVParamType('TagKey', 'TagValues', True),
+    'DeviceAlias': KVParamType('InstanceId', 'Alias', False),
 }
 
 
@@ -185,9 +197,10 @@ def param2parser(parser, param, info):
             if param in TENCENT_DEFAULT_PARAMS.keys():
                 kw['default'] = TENCENT_DEFAULT_PARAMS[param]
                 kw['help'] += ' (default: %(default)s)'
-
     # param type in sdk
-    elif tname not in SPECIAL_PARAM_TYPES.keys():
+    elif tname in SPECIAL_PARAM_TYPES.keys():
+        kw['help'] += SPECIAL_PARAM_TYPES[tname].help_message
+    else:
         # NOTE:(everpcpc) if raised, add support for it
         raise Exception(f'param: {info.name} => {info.type} not yet supported')
     parser.add_argument(f'--{inflection.dasherize(param)}', **kw)
@@ -199,10 +212,10 @@ def arg2param(arg, param, info):
         return arg
     elif tname in SPECIAL_PARAM_TYPES.keys():
         if info.multi:
-            return [SPECIAL_PARAM_TYPES[tname](a) for a in arg]
-        return SPECIAL_PARAM_TYPES[tname](arg)
+            return [SPECIAL_PARAM_TYPES[tname].parse_value(a) for a in arg]
+        return SPECIAL_PARAM_TYPES[tname].parse_value(arg)
     else:
-        raise Exception('param {param} not supported: {info}')
+        raise Exception(f'param {param} not supported: {info}')
 
 
 def args2params(args, params, prefix=''):
