@@ -215,7 +215,7 @@ def arg2param(arg, param, info):
             return [SPECIAL_PARAM_TYPES[tname].parse_value(a) for a in arg]
         return SPECIAL_PARAM_TYPES[tname].parse_value(arg)
     else:
-        raise Exception('param {param} not supported: {info}')
+        raise Exception(f'param {param} not supported: {info}')
 
 
 def args2params(args, params, prefix=''):
