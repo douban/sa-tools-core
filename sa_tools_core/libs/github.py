@@ -5,14 +5,17 @@ import logging
 import datetime
 from pathlib import Path, PurePath
 
-from sa_tools_core.consts import (GITHUB_USERNAME, GITHUB_PERSONAL_TOKEN, GITHUB_API_ENTRYPOINT)
+from sa_tools_core.consts import GITHUB_API_ENTRYPOINT
+from sa_tools_core.utils import get_config
 
 logger = logging.getLogger(__name__)
 
+github_secret_func = lambda: get_config('github')
 
 class GithubRepo:
     def __init__(self, org, repo, entrypoint=None,
-                 user_name=None, personal_token=None, author=None, skip_ssl=False):
+                 user_name=None, personal_token=None, secret_func=None,
+                 author=None, skip_ssl=False):
         self.org = org
         self.repo = repo
         self.author = author
@@ -21,11 +24,31 @@ class GithubRepo:
         self.base_tree = None
         self.head_commit = None
         self.head_tree = None
-        self.user_name = user_name
-        self.personal_token = personal_token
+        self.secret_func = secret_func
         self.session = requests.Session()
+        if user_name and personal_token:
+            self.user_name = user_name
+            self.personal_token = personal_token
+        else:
+            (self.user_name, self.personal_token) = self.get_user_token_pair()
         self.session.auth = (self.user_name, self.personal_token)
         self.skip_ssl = skip_ssl
+
+    def __enter__(self):
+        pass
+
+    def __exit__(self):
+        if self.session:
+            self.session.close()
+
+    def get_user_token_pair(self):
+        if self.secret_func:
+            secret = self.secret_func()
+            divided_secret = secret.split(':', 1)
+            if len(divided_secret) != 2:
+                raise ValueError("Invalid secret, suppose to be able to be split into 2 strings")
+            return divided_secret
+        raise ValueError("Please define either username & token or secret_func.")
 
     def make_request(self, method, api_path, **kwargs):
         r = self.session.request(method, f"{self.entrypoint}{api_path}", verify=(not self.skip_ssl), **kwargs)
@@ -265,21 +288,19 @@ def commit_github(org, repo, branch, files, message, retry=2):
             filecontent -> bytes
             example: {'example.md', b'Hello world', 'libs/example2.md', b'Hello world2'}
     """
-    gh = GithubRepo(org, repo,
-                    user_name=GITHUB_USERNAME, personal_token=GITHUB_PERSONAL_TOKEN, entrypoint=GITHUB_API_ENTRYPOINT)
     return_value = -1
-    for _ in range(retry + 1):
-        try:
-            gh.update_files(branch, files, message)
-            return_value = 0
-            break
-        except Exception as e:
-            logger.warning(e)
-            logger.warning('Request failed , retrying')
+    with GithubRepo(org, repo, entrypoint=GITHUB_API_ENTRYPOINT, secret_func=github_secret_func) as gh:
+        for _ in range(retry + 1):
+            try:
+                gh.update_files(branch, files, message)
+                return_value = 0
+                break
+            except Exception as e:
+                logger.warning(e)
+                logger.warning('Request failed , retrying')
     return return_value
 
 
 def submit_pr(org, repo, *args, **kwargs):
-    gh = GithubRepo(org, repo,
-                    user_name=GITHUB_USERNAME, personal_token=GITHUB_PERSONAL_TOKEN, entrypoint=GITHUB_API_ENTRYPOINT)
-    return gh.submit_pr(*args, **kwargs)
+    with GithubRepo(org, repo, entrypoint=GITHUB_API_ENTRYPOINT, secret_func=github_secret_func) as gh:
+        return gh.submit_pr(*args, **kwargs)
