@@ -35,9 +35,9 @@ class GithubRepo:
         self.skip_ssl = skip_ssl
 
     def __enter__(self):
-        pass
+        return self
 
-    def __exit__(self):
+    def __exit__(self, exception_type, exception_value, traceback):
         if self.session:
             self.session.close()
 
