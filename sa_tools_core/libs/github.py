@@ -34,6 +34,13 @@ class GithubRepo:
         self.session.auth = (self.user_name, self.personal_token)
         self.skip_ssl = skip_ssl
 
+    def __enter__(self):
+        pass
+
+    def __exit__(self):
+        if self.session:
+            self.session.close()
+
     def get_user_token_pair(self):
         if self.secret_func:
             secret = self.secret_func()
@@ -281,21 +288,19 @@ def commit_github(org, repo, branch, files, message, retry=2):
             filecontent -> bytes
             example: {'example.md', b'Hello world', 'libs/example2.md', b'Hello world2'}
     """
-    gh = GithubRepo(org, repo, entrypoint=GITHUB_API_ENTRYPOINT, secret_func=github_secret_func)
     return_value = -1
-    for _ in range(retry + 1):
-        try:
-            gh.update_files(branch, files, message)
-            gh.session.close()
-            return_value = 0
-            break
-        except Exception as e:
-            logger.warning(e)
-            logger.warning('Request failed , retrying')
+    with GithubRepo(org, repo, entrypoint=GITHUB_API_ENTRYPOINT, secret_func=github_secret_func) as gh:
+        for _ in range(retry + 1):
+            try:
+                gh.update_files(branch, files, message)
+                return_value = 0
+                break
+            except Exception as e:
+                logger.warning(e)
+                logger.warning('Request failed , retrying')
     return return_value
 
 
 def submit_pr(org, repo, *args, **kwargs):
-    gh = GithubRepo(org, repo, entrypoint=GITHUB_API_ENTRYPOINT, secret_func=github_secret_func)
-    gh.session.close()
-    return gh.submit_pr(*args, **kwargs)
+    with GithubRepo(org, repo, entrypoint=GITHUB_API_ENTRYPOINT, secret_func=github_secret_func) as gh:
+        return gh.submit_pr(*args, **kwargs)
