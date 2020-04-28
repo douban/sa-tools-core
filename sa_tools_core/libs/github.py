@@ -286,6 +286,7 @@ def commit_github(org, repo, branch, files, message, retry=2):
     for _ in range(retry + 1):
         try:
             gh.update_files(branch, files, message)
+            gh.session.close()
             return_value = 0
             break
         except Exception as e:
@@ -296,4 +297,5 @@ def commit_github(org, repo, branch, files, message, retry=2):
 
 def submit_pr(org, repo, *args, **kwargs):
     gh = GithubRepo(org, repo, entrypoint=GITHUB_API_ENTRYPOINT, secret_func=github_secret_func)
+    gh.session.close()
     return gh.submit_pr(*args, **kwargs)
