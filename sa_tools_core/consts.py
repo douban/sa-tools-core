@@ -143,8 +143,6 @@ TENCENT_DEFAULT_PARAMS = {
 # # Others
 ########################
 
-GITHUB_USERNAME = 'your_name'
-GITHUB_PERSONAL_TOKEN = 'your_token'
 GITHUB_API_ENTRYPOINT = 'https://ghe.yourdomain.com/api/v3'
 
 try:
