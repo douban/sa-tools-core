@@ -13,6 +13,7 @@ from sa_tools_core.libs.permission import require_sa, require_user  # NOQA
 from sa_tools_core.libs.es import ESQuery
 from sa_tools_core.libs.timeformat import timeformat
 from sa_tools_core.consts import (SA_ES_HOSTS, SA_ES_NGINX_ACCESS_INDEX_PREFIX,
+                                  SA_ES_NGINX_ACCESS_INDEX_TIME_FORMAT,
                                   SA_ES_NGINX_ACCESS_DOC_TYPE, SA_ES_VERSION,
                                   SA_ES_NGINX_ACCESS_TIMESTAMP_FIELD_NAME,
                                   SA_ES_NGINX_ACCESS_LOG_FIELD_NAME)
@@ -33,7 +34,8 @@ class NginxAccessESQuery(ESQuery):
                  es_hosts=SA_ES_HOSTS,
                  index_prefix=SA_ES_NGINX_ACCESS_INDEX_PREFIX,
                  doc_type=SA_ES_NGINX_ACCESS_DOC_TYPE,
-                 timestamp_field=SA_ES_NGINX_ACCESS_TIMESTAMP_FIELD_NAME):
+                 timestamp_field=SA_ES_NGINX_ACCESS_TIMESTAMP_FIELD_NAME,
+                 index_time_format=SA_ES_NGINX_ACCESS_INDEX_TIME_FORMAT):
         super(NginxAccessESQuery, self).__init__(es_hosts=es_hosts, index_prefix=index_prefix,
                                                  doc_type=doc_type, timestamp_field=timestamp_field)
 

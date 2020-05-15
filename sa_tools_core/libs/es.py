@@ -9,11 +9,12 @@ from elasticsearch import Elasticsearch, __version__ as es_client_version
 
 
 class ESQuery(object):
-    def __init__(self, es_hosts, index_prefix, doc_type, timestamp_field):
+    def __init__(self, es_hosts, index_prefix, doc_type, timestamp_field, index_time_format='%Y.%m.%d'):
         self.client = Elasticsearch(hosts=es_hosts)
         self.index_prefix = index_prefix
         self.doc_type = doc_type
         self.timestamp_field = timestamp_field
+        self.index_time_format = index_time_format
 
     def get_mapping(self, fields=None):
         """Retrieve mapping definition of index or specific field.
@@ -48,7 +49,7 @@ class ESQuery(object):
         end_utc_datetime = datetime.utcfromtimestamp(end_timestamp)
         ordinal_range = range(start_utc_datetime.toordinal(), end_utc_datetime.toordinal() + 1)
         indexes = ','.join('%s%s' % (self.index_prefix,
-                                     datetime.fromordinal(i).strftime('%Y.%m.%d'))
+                                     datetime.fromordinal(i).strftime(self.index_time_format))
                            for i in ordinal_range)
         return indexes
 
