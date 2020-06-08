@@ -53,6 +53,12 @@ SPECIAL_PARAM_TYPES = {
     'DeviceAlias': KVParamType('InstanceId', 'Alias', False),
 }
 
+# TODO: deal with list of internal type
+IGNORE_PARAM_TYPES = [
+    'DataDisk',
+    'TagSpecification',
+]
+
 
 def simplify_action(action):
     action = action.replace('Get', '') \
@@ -134,7 +140,7 @@ def extract_params(doc_str, models):
         if not m:
             continue
         last_pname = pname = inflection.underscore(m.group(2))
-        pinfo = params.get(pname, None) or ParamInfo(m.group(2))
+        pinfo = params.pop(pname, None) or ParamInfo(m.group(2))
         if m.group(1) == 'param':
             pinfo.desc = m.group(3)
         elif m.group(1) == 'type':
@@ -148,6 +154,8 @@ def extract_params(doc_str, models):
             elif t in SPECIAL_PARAM_TYPES.keys():
                 pinfo.type = getattr(models, t)
             # NOTE: deal with internal class
+            elif t in IGNORE_PARAM_TYPES:
+                continue
             elif t.startswith(':class:'):
                 _mod, _t = t[len(':class:'):].strip('`').rsplit('.', 1)
                 if _mod != models.__name__:
@@ -156,8 +164,8 @@ def extract_params(doc_str, models):
                 pinfo.type = subparams
             else:
                 raise Exception(f'unkown param type {t} => {line.strip()}')
-
-        params[pname] = pinfo
+        if pinfo:
+            params[pname] = pinfo
 
     return params
 
@@ -172,7 +180,6 @@ def param2parser(parser, param, info):
         return
 
     kw = {'help': cleanup_help_message(info.desc)}
-
     tname = info.type.__name__
     if info.multi:
         kw['nargs'] = '*'
