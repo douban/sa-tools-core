@@ -76,7 +76,7 @@ class HTMLFilter(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         if tag == 'li':
-            self.text += '\n➡️ '
+            self.text += '\n-> '
         elif tag == 'br':
             self.text += '\n'
         elif tag == 'p':
