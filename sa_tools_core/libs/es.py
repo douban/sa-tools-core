@@ -9,10 +9,9 @@ from elasticsearch import Elasticsearch, __version__ as es_client_version
 
 
 class ESQuery(object):
-    def __init__(self, es_hosts, index_prefix, doc_type, timestamp_field, index_time_format='%Y.%m.%d'):
-        self.client = Elasticsearch(hosts=es_hosts)
+    def __init__(self, es_hosts, es_user, es_passwd, index_prefix, timestamp_field, index_time_format='%Y.%m.%d'):
+        self.client = Elasticsearch(hosts=es_hosts, http_auth=(es_user, es_passwd))
         self.index_prefix = index_prefix
-        self.doc_type = doc_type
         self.timestamp_field = timestamp_field
         self.index_time_format = index_time_format
 
@@ -22,11 +21,9 @@ class ESQuery(object):
         indexes = self.compute_indexes(*self.compute_start_end_timestamp(0, 0))
         if fields:
             res = self.client.indices.get_field_mapping(index=indexes,
-                                                        doc_type=self.doc_type,
                                                         fields=fields)
         else:
-            res = self.client.indices.get_mapping(index=indexes,
-                                                  doc_type=self.doc_type)
+            res = self.client.indices.get_mapping(index=indexes)
         return res
 
     def compute_start_end_timestamp(self, start, duration):
@@ -106,9 +103,6 @@ class ESQuery(object):
         params = dict(index=indexes,
                       size=size,
                       body=body)
-        # elasticsearch-py 7 no longer accepts 'doc_type' as a search parameter.
-        if es_client_version < (7, 0, 0):
-            params['doc_type'] = self.doc_type
 
         res = self.client.search(**params)
         return res
