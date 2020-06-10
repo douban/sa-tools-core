@@ -17,7 +17,7 @@ requirements = [
     'pydnspod2',
 
     # sa-access
-    'elasticsearch>=6.0.0',
+    'elasticsearch>=7.0.0',
 
     # sa-disk
     'humanize',
