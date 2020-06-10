@@ -43,7 +43,9 @@ class NginxAccessESQuery(ESQuery):
                  es_user=SA_ES_USER,
                  es_passwd=SA_ES_PASSWD):
         super(NginxAccessESQuery, self).__init__(es_hosts=es_hosts, index_prefix=index_prefix,
-                                        timestamp_field=timestamp_field, index_time_format=index_time_format, es_user=es_user, es_passwd=es_passwd)
+                                                 timestamp_field=timestamp_field, 
+                                                 index_time_format=index_time_format, 
+                                                 es_user=es_user, es_passwd=es_passwd)
 
     def make_body(self, time_range=None, query_string=None, term_dict=None,
                   aggregations=None, sort=None,
