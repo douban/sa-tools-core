@@ -19,7 +19,7 @@ from sa_tools_core.consts import (SA_ES_HOSTS, SA_ES_VERSION,
                                   SA_ES_NGINX_ACCESS_LOG_FIELD_NAME)
 try:
     from sa_tools_core.consts import (SA_ES_USER, SA_ES_PASSWD)
-except:
+except Exception as e:
     SA_ES_USER = ''
     SA_ES_PASSWD = ''
 from sa_tools_core.utils import get_os_username, props, i2ip
@@ -43,8 +43,8 @@ class NginxAccessESQuery(ESQuery):
                  es_user=SA_ES_USER,
                  es_passwd=SA_ES_PASSWD):
         super(NginxAccessESQuery, self).__init__(es_hosts=es_hosts, index_prefix=index_prefix,
-                                                 timestamp_field=timestamp_field, 
-                                                 index_time_format=index_time_format, 
+                                                 timestamp_field=timestamp_field,
+                                                 index_time_format=index_time_format,
                                                  es_user=es_user, es_passwd=es_passwd)
 
     def make_body(self, time_range=None, query_string=None, term_dict=None,
