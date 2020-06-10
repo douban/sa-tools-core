@@ -9,8 +9,8 @@ from elasticsearch import Elasticsearch, __version__ as es_client_version
 
 
 class ESQuery(object):
-    def __init__(self, es_hosts, es_user, es_passwd, index_prefix, timestamp_field, index_time_format='%Y.%m.%d'):
-        self.client = Elasticsearch(hosts=es_hosts, http_auth=(es_user, es_passwd))
+    def __init__(self, es_hosts, index_prefix, timestamp_field, index_time_format='%Y.%m.%d', es_user='', es_passwd=''):
+        self.client = Elasticsearch(hosts=es_hosts, http_auth=(es_user, es_passwd)) if es_user and es_passwd else Elasticsearch(hosts=es_hosts)
         self.index_prefix = index_prefix
         self.timestamp_field = timestamp_field
         self.index_time_format = index_time_format

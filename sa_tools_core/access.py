@@ -12,11 +12,16 @@ import six
 from sa_tools_core.libs.permission import require_sa, require_user  # NOQA
 from sa_tools_core.libs.es import ESQuery
 from sa_tools_core.libs.timeformat import timeformat
-from sa_tools_core.consts import (SA_ES_HOSTS, SA_ES_USER, SA_ES_PASSWD,
+from sa_tools_core.consts import (SA_ES_HOSTS, SA_ES_VERSION,
                                   SA_ES_NGINX_ACCESS_INDEX_PREFIX,
-                                  SA_ES_NGINX_ACCESS_INDEX_TIME_FORMAT, SA_ES_VERSION,
+                                  SA_ES_NGINX_ACCESS_INDEX_TIME_FORMAT,
                                   SA_ES_NGINX_ACCESS_TIMESTAMP_FIELD_NAME,
                                   SA_ES_NGINX_ACCESS_LOG_FIELD_NAME)
+try:
+    from sa_tools_core.consts import (SA_ES_USER, SA_ES_PASSWD)
+except:
+    SA_ES_USER = ''
+    SA_ES_PASSWD = ''
 from sa_tools_core.utils import get_os_username, props, i2ip
 
 logger = logging.getLogger(__name__)
@@ -32,12 +37,13 @@ N_DOC_DEFAULT = 10
 class NginxAccessESQuery(ESQuery):
     def __init__(self,
                  es_hosts=SA_ES_HOSTS,
-                 es_user=SA_ES_USER,
-                 es_passwd=SA_ES_PASSWD,
                  index_prefix=SA_ES_NGINX_ACCESS_INDEX_PREFIX,
                  timestamp_field=SA_ES_NGINX_ACCESS_TIMESTAMP_FIELD_NAME,
-                 index_time_format=SA_ES_NGINX_ACCESS_INDEX_TIME_FORMAT):
-        super(NginxAccessESQuery, self).__init__(es_hosts=es_hosts, index_prefix=index_prefix, timestamp_field=timestamp_field)
+                 index_time_format=SA_ES_NGINX_ACCESS_INDEX_TIME_FORMAT,
+                 es_user=SA_ES_USER,
+                 es_passwd=SA_ES_PASSWD):
+        super(NginxAccessESQuery, self).__init__(es_hosts=es_hosts, index_prefix=index_prefix,
+                                        timestamp_field=timestamp_field, es_user=es_user, es_passwd=es_passwd)
 
     def make_body(self, time_range=None, query_string=None, term_dict=None,
                   aggregations=None, sort=None,
