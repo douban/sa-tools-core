@@ -73,6 +73,7 @@ def notify(args):
             NOTIFICATION_IS_ARCHIVE=False,
             NAGIOS_CONTACTNAME='shuaisa',
             SERVICE_DURATION_SEC='5.001102',
+            NAGIOS_CUSTOM_WIKI=''
         ) if args.test else os.environ)
 
     unicode_env = {}
@@ -92,7 +93,9 @@ def notify(args):
         time=' '.join(env.NAGIOS_LONGDATETIME.split()[:2]),
         extra=(env.NAGIOS_HOSTOUTPUT if env.TARGET_TYPE == 'host' else env.NAGIOS_SERVICEOUTPUT),
         link='',
-        wiki_base_url=ALERT_WIKI_BASE_URL.rstrip(' /'))
+        custom_wiki_url=env.NAGIOS_CUSTOM_WIKI,
+        wiki_base_url=ALERT_WIKI_BASE_URL.rstrip(' /')
+        )
     duration = env.SERVICE_DURATION_SEC if env.TARGET_TYPE == 'service' \
         else env.HOST_DURATION_SEC
 

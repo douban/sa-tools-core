@@ -113,7 +113,9 @@ Comment: [${env.NOTIFICATIONAUTHORNAME}] ${env.NOTIFICATIONCOMMENT}
     %endif
 %endif
 
-%if short_env.wiki_base_url and short_env.service:
+%if short_env.custom_wiki_url:
+Wiki: ${short_env.custom_wiki_url}
+%elif short_env.wiki_base_url and short_env.service:
 Wiki: ${short_env.wiki_base_url}/${short_env.service}
 %endif
 
