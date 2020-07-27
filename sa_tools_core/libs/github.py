@@ -57,6 +57,8 @@ class GithubRepo:
         except requests.exceptions.RequestException as e:
             logger.error(r.text)
             raise e
+        if r.status_code == 204:
+            return None
         return r.json()
 
     def get_file(self, path, reference=None):
@@ -164,6 +166,30 @@ class GithubRepo:
                                  data=json.dumps({
                                      'merge_method': merge_method
                                  }))
+
+    def has_collaborator(self, username):
+        """if present, return True, if not, return False"""
+        r = self.session.request("GET", f"{self.entrypoint}/repos/{self.org}/{self.repo}/collaborators/{username}",
+                                 verify=(not self.skip_ssl))
+        r.raise_for_status()
+        if r.status_code == 204:
+            return True
+        else:
+            return False
+
+    def add_collaborator(self, username, permission=None):
+        """permissions: `pull`, `push`, `admin`, `maintain`, `triage` 
+        return None on default, raise exception if anything wrong
+        """
+        if permission is None:
+            permission = 'push'
+        self.make_request('PUT', f"/repos/{self.org}/{self.repo}/collaborators/{username}",
+                                 data=json.dumps({
+                                     'permission': permission
+                                 }))
+
+    def remove_collaborator(self, username):
+        self.make_request('DELETE', f"/repos/{self.org}/{self.repo}/collaborators/{username}")
 
     # high level api starts here
     def add(self, files, base_reference):
@@ -275,7 +301,14 @@ class GithubRepo:
             self.merge_pull_request(created_pr['number'], merge_method=merge_method)
             logger.info('PR was successfully merged')
         return created_pr
-
+    
+    def ensure_collaborator(self, username, permission=None):
+        """permissions: `pull`, `push`, `admin`, `maintain`, `triage` 
+        return None on default, raise exception if anything wrong
+        """
+        if self.has_collaborator(username):
+            self.remove_collaborator(username)
+        self.add_collaborator(username, permission=permission)
 
 def commit_github(org, repo, branch, files, message, retry=2):
     """update files of a repo on a branch head.
