@@ -195,6 +195,15 @@ sa-tc bm devices -f yaml
 sa-tc bm devices --alias host
 ```
 
+### sa-github
+
+`sa-github` 是对 Github API V3 的封装, 支持 github.com 和 ghe, 目前功能还在完善中, 只支持 collaborator api 
+
+```shell
+sa-github collaborator --org xxx --repo yyy add --username user_1 --permission admin
+sa-github collaborator --org xxx --repo yyy remove --username user_1
+```
+
 ## Client
 
 Tools can be called from client as well.
