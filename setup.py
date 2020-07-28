@@ -57,6 +57,7 @@ entry_points = """
     sa-script = sa_tools_core.script:main [script]
     sa-icinga = sa_tools_core.icinga:main [icinga]
     sa-tc = sa_tools_core.tc:main [tencentcloud]
+    sa-github = sa_tools_core.github:main
     # sa-node = sa_tools_core.node:main
     # sa-lvs = sa_tools_core.lvs:main
     # sa-rsync = sa_tools_core.rsync:main

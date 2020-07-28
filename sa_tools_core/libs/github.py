@@ -171,11 +171,12 @@ class GithubRepo:
         """if present, return True, if not, return False"""
         r = self.session.request("GET", f"{self.entrypoint}/repos/{self.org}/{self.repo}/collaborators/{username}",
                                  verify=(not self.skip_ssl))
-        r.raise_for_status()
         if r.status_code == 204:
             return True
-        else:
+        elif r.status_code == 404:
             return False
+        else:
+            r.raise_for_status()
 
     def add_collaborator(self, username, permission=None):
         """permissions: `pull`, `push`, `admin`, `maintain`, `triage` 
