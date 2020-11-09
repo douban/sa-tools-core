@@ -10,7 +10,10 @@ from sa_tools_core.utils import get_config
 
 logger = logging.getLogger(__name__)
 
-github_secret_func = lambda: get_config('github')
+
+def github_secret_func():
+    return get_config('github')
+
 
 class GithubRepo:
     def __init__(self, org, repo, entrypoint=None,
@@ -192,6 +195,18 @@ class GithubRepo:
     def remove_collaborator(self, username):
         self.make_request('DELETE', f"/repos/{self.org}/{self.repo}/collaborators/{username}")
 
+    def create_commit_comment(self, commit_sha, comment_content, path=None, position=None):
+        comment = {'body': comment_content}
+        if path:
+            comment['path'] = path
+        if position:
+            comment['position'] = position
+        return self.make_request('POST', f"/repos/{self.org}/{self.repo}/commits/{commit_sha}/comments",
+                                 data=json.dumps(comment))
+
+    def list_commit_comments(self, commit_sha):
+        return self.make_request('GET', f"/repos/{self.org}/{self.repo}/commits/{commit_sha}/comments")
+
     # high level api starts here
     def add(self, files, base_reference):
         """add files to the tree, generate a tree , store the tree_sha to self.head_tree"""
@@ -310,6 +325,7 @@ class GithubRepo:
         if self.has_collaborator(username):
             self.remove_collaborator(username)
         self.add_collaborator(username, permission=permission)
+
 
 def commit_github(org, repo, branch, files, message, retry=2):
     """update files of a repo on a branch head.
