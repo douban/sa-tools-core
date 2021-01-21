@@ -2,8 +2,7 @@
 
 from __future__ import print_function
 
-import os
-import re
+import os import re
 import six
 import logging
 import argparse
@@ -199,6 +198,6 @@ def main():
 
     if args.parser_name == 'notify':
         if not any(vars(args)[type_] for type_ in NOTIFY_TYPES):
-            notify_parser.error("too few arguments")
+            sys.exit(0)
 
     args.func(args)
