@@ -9,16 +9,18 @@ from sa_tools_core.consts import PROXIES
 logger = logging.getLogger(__name__)
 
 
-def send_message(chatid, content):
-    PUSH_KEY = get_config('telegram')
-    PUSH_URL = 'https://api.telegram.org/bot%s/sendMessage' % PUSH_KEY
+def send_message(chatid, content, markdown=False):
+    PUSH_KEY = get_config("telegram")
+    PUSH_URL = "https://api.telegram.org/bot%s/sendMessage" % PUSH_KEY
 
     message = {
         "chat_id": chatid,
-        "text": content
+        "text": content,
     }
+    if markdown:
+        message["parse_mode"] = "MarkdownV2"
 
     req = requests.post(PUSH_URL, json=message, proxies=PROXIES)
     resp = req.json()
-    if not resp['ok']:
-        raise Exception('api failed, resp: %s' % resp)
+    if not resp["ok"]:
+        raise Exception("api failed, resp: %s" % resp)

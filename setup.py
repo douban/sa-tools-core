@@ -10,7 +10,7 @@ requirements = [
     'six>=1.12.0',
 
     # sa-notify
-    'wechat3',
+    'wechatpy',
     'requests',
 
     # sa-dns

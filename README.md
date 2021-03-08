@@ -57,11 +57,11 @@ For all the CLI tools, you can type `-h` or `--help` to get help messages and ex
 
 ### sa-notify
 
-通知提醒工具，支持 wechat, wework(企业微信), email, sms, pushbullet, pushover, telegram 等多种通知类型。
+通知提醒工具，支持 wework(企业微信), email, sms, pushbullet, pushover, telegram 等多种通知类型。
 
 ```shell
-sa-notify --wechat user1 --content 'xxx'
-echo 'xxx' | sa-notify --wechat user1,user2 --email user1@example.com user3@example.com
+sa-notify --wework user1 --content 'xxx'
+echo 'xxx' | sa-notify --wework user1,user2 --email user1@example.com user3@example.com
 ```
 
 ### sa-dns
@@ -150,9 +150,9 @@ icinga2 doc: <http://docs.icinga.org/icinga2/latest/doc/module/icinga2/toc>
 
 ```shell
 # try test
-sa-icinga notify --wechat user1 --email user1@example.com --test
+sa-icinga notify --wework user1 --email user1@example.com --test
 
-sa-icinga notify --wechat user1 --email user1@example.com  # need icinga pass os environment vars
+sa-icinga notify --wework user1 --email user1@example.com  # need icinga pass os environment vars
 
 sa-icinga ack --host sa --service check-puppet --comment 'hehe'
 sa-icinga ack --host 'sa*' --service 'check-puppet'
@@ -197,7 +197,7 @@ sa-tc bm devices --alias host
 
 ### sa-github
 
-`sa-github` 是对 Github API V3 的封装, 支持 github.com 和 ghe, 目前功能还在完善中, 只支持 collaborator api 
+`sa-github` 是对 Github API V3 的封装, 支持 github.com 和 ghe, 目前功能还在完善中, 只支持 collaborator api
 
 ```shell
 sa-github collaborator --org xxx --repo yyy add --username user_1 --permission admin

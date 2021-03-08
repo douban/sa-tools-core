@@ -2,23 +2,23 @@
 ## TODO: use include mako page
 
 %if fragment_type == 'title':
-    ${title(env, notify_type)}
+    ${plain_content(env, notify_type)}
 %elif fragment_type == 'content':
     %if notify_type in ('email', 'pushover', 'sms', 'pushbullet'):
-        ${content(env, notify_type)}
-    %else:
-        %if notify_type == 'wechat':
-            ${short_alert(env, short_env)}
-            |
-        %endif
-        ${title(env, notify_type)}
+        ${plain_content(env, notify_type)}
+    %elif notify_type in ('telegram', 'wework'):
+        ${markdown_title(env, notify_type)}
         |
-        ${content(env, notify_type)}
+        ${markdown_content(env, notify_type)}
+    %else
+        ${plain_title(env, notify_type)}
+        |
+        ${plain_content(env, notify_type)}
     %endif
 %endif
 
 
-<%def name="title(env, notify_type)" >
+<%def name="plain_title(env, notify_type)" >
 <%
     archive_hint = '[ICINGA ARCHIVE] ' if env.NOTIFICATION_IS_ARCHIVE else ''
 %>
@@ -36,7 +36,23 @@ ${archive_hint}${env.NAGIOS_NOTIFICATIONTYPE} - ${env.NAGIOS_HOSTALIAS}/${env.NA
 </%def>
 
 
-<%def name="content(env, notify_type)" >
+<%def name="markdown_title(env, notify_type)" >
+%if env.TARGET_TYPE == 'host':
+
+## ${env.NOTIFICATIONTYPE - $HOSTDISPLAYNAME is $HOSTSTATE
+Host ${env.NAGIOS_HOSTSTATE} alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!
+
+%elif env.TARGET_TYPE == 'service':
+
+## $NOTIFICATIONTYPE - $HOSTDISPLAYNAME - $SERVICEDISPLAYNAME is $SERVICESTATE
+${env.NAGIOS_NOTIFICATIONTYPE} - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDESC} is ${env.NAGIOS_SERVICESTATE}
+
+%endif
+</%def>
+
+
+
+<%def name="plain_content(env, notify_type)" >
 %if env.TARGET_TYPE == 'host':
     %if notify_type == 'sms':
 
@@ -126,6 +142,50 @@ Acknowledge: ${ack_link}
 QuickReboot: ${reboot_host_link}
 %endif
 </%def>
+
+
+<%def name="markdown_content(env, notify_type)" >
+%if env.TARGET_TYPE == 'host':
+
+Notification Type: ${env.NAGIOS_NOTIFICATIONTYPE}
+Host: ${env.NAGIOS_HOSTALIAS}
+Duration: ${env.NAGIOS_HOSTDURATION}
+Date/Time: ${env.NAGIOS_LONGDATETIME}
+Additional Info:
+${env.NAGIOS_HOSTOUTPUT}
+${env.NAGIOS_LONGHOSTOUTPUT}
+        %if env.NOTIFICATIONAUTHORNAME:
+Comment: [${env.NOTIFICATIONAUTHORNAME}] ${env.NOTIFICATIONCOMMENT}
+        %endif
+
+%elif env.TARGET_TYPE == 'service':
+
+${short_env.time}
+${'Duration: %s' % env.NAGIOS_SERVICEDURATION if env.SERVICE_DURATION_SEC and float(env.SERVICE_DURATION_SEC) > 1 else ''}
+${'Contacts: %s' % env.NAGIOS__SERVICECONTACT if env.NAGIOS__SERVICECONTACT else ''}
+Additional Info:
+${env.NAGIOS_SERVICEOUTPUT}
+${env.NAGIOS_LONGSERVICEOUTPUT}
+        %if env.NOTIFICATIONAUTHORNAME:
+Comment: [${env.NOTIFICATIONAUTHORNAME}] ${env.NOTIFICATIONCOMMENT}
+        %endif
+
+%endif
+
+%if short_env.custom_wiki_url:
+Wiki: ${short_env.custom_wiki_url}
+%elif short_env.wiki_base_url and short_env.service:
+Wiki: ${short_env.wiki_base_url}/${short_env.service}
+%endif
+
+%if ack_link:
+Acknowledge: ${ack_link}
+%endif
+%if reboot_host_link:
+QuickReboot: ${reboot_host_link}
+%endif
+</%def>
+
 
 
 <%def name="short_alert(env, short_env)" >
