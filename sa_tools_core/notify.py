@@ -18,8 +18,9 @@ from sa_tools_core.consts import SYSADMIN_EMAIL
 logger = logging.getLogger(__name__)
 logging.getLogger("requests").setLevel(logging.WARN)
 
-NOTIFY_TYPES = ('wechat', 'wework', 'email', 'sms', 'pushbullet', 'pushover', 'telegram')
-DEFAULT_TITLE = 'Sent from sa-notify'
+NOTIFY_TYPES = ("wechat", "wework", "email", "sms", "pushbullet", "pushover", "telegram")
+MARKDOWN_NOTIFY_TYPES = ("wechat", "wework", "telegram")
+DEFAULT_TITLE = "Sent from sa-notify"
 
 
 class Notifier(object):
@@ -30,28 +31,29 @@ class Notifier(object):
 
     def __getattr__(self, attr):
         if attr in NOTIFY_TYPES:
-            f = getattr(self, '_%s' % attr)
+            f = getattr(self, "_%s" % attr)
 
             def _func(*a, **kw):
-                addrs = kw.get('addrs') or a[0]
+                addrs = kw.get("addrs") or a[0]
                 addrs = [addr for addr in addrs if addr]
                 if not addrs:
-                    logger.warning('notify abort, ignoring empty %s addrs', attr)
+                    logger.warning("notify abort, ignoring empty %s addrs", attr)
                     return
-                kw['content'] = kw.get('content') or self.content
-                kw['title'] = kw.get('title') or self.title
-                if kw['title']:
-                    kw['title'] = kw['title'].strip()
-                logger.info('notify %s %s', attr, addrs)
+                kw["content"] = kw.get("content") or self.content
+                kw["title"] = kw.get("title") or self.title
+                if kw["title"]:
+                    kw["title"] = kw["title"].strip()
+                logger.info("notify %s %s", attr, addrs)
                 return f(*a, **kw)
+
             return _func
         raise AttributeError
 
     def _wechat(self, addrs, content=None, **kw):
-        send_wechat('|'.join(addrs), content)
+        send_wechat("|".join(addrs), content)
 
     def _wework(self, addrs, content=None, **kw):
-        send_wechat('|'.join(addrs), content, qy=True)
+        send_wechat("|".join(addrs), content, qy=True)
 
     def _email(self, addrs, content=None, title=None, from_addr=None, **kw):
         send_mail(addrs, content, subject=title, from_addr=from_addr or self.from_addr)
@@ -79,11 +81,11 @@ def notify(args):
     for type_ in NOTIFY_TYPES:
         values = vars(args)[type_]
         if values:
-            addrs = [i for v in values for i in re.split(r'[,\s]+', v)]
+            addrs = [i for v in values for i in re.split(r"[,\s]+", v)]
             try:
                 getattr(notifier, type_)(addrs, from_addr=args.from_addr)
             except Exception as e:
-                logger.exception('Notifier.%s(%s) failed: %s', type_, addrs, e)
+                logger.exception("Notifier.%s(%s) failed: %s", type_, addrs, e)
 
 
 def main(args=None):
@@ -92,22 +94,24 @@ def main(args=None):
     $ sa-notify --wechat user1 --content 'xxx'
     $ echo 'xxx' | sa-notify --wechat user1,user2 --email user1@douban.com user3@douban.com
     """
-    parser = argparse.ArgumentParser(epilog=main.__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('-u', '--user', help='LDAP username, use your OS user name by default.')
-    parser.add_argument('-c', '--content', help='content.')
-    parser.add_argument('-s', '--subject', help='subject. default="%(default)s"',
-                        default=DEFAULT_TITLE)
-    parser.add_argument('-f', '--from-addr', help='From address, currently only works for email.')
+    parser = argparse.ArgumentParser(
+        epilog=main.__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument("-u", "--user", help="LDAP username, use your OS user name by default.")
+    parser.add_argument("-c", "--content", help="content.")
+    parser.add_argument(
+        "-s", "--subject", help='subject. default="%(default)s"', default=DEFAULT_TITLE
+    )
+    parser.add_argument("-f", "--from-addr", help="From address, currently only works for email.")
     for type_ in NOTIFY_TYPES:
-        parser.add_argument('--%s' % type_, nargs='*',
-                            help='your enterprise address of %s.' % type_)
+        parser.add_argument(
+            "--%s" % type_, nargs="*", help="your enterprise address of %s." % type_
+        )
 
     args = parser.parse_args(args)
     args.user = args.user or get_os_username()
 
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s %(name)s %(levelname)s %(message)s')
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
     if not any(vars(args)[type_] for type_ in NOTIFY_TYPES):
         parser.error("too few arguments")
