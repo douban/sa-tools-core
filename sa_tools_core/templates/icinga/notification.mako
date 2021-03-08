@@ -40,12 +40,12 @@ ${archive_hint}${env.NAGIOS_NOTIFICATIONTYPE} - ${env.NAGIOS_HOSTALIAS}/${env.NA
 %if env.TARGET_TYPE == 'host':
 
 ## ${env.NOTIFICATIONTYPE - $HOSTDISPLAYNAME is $HOSTSTATE
-Host ${env.NAGIOS_HOSTSTATE} alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!
+Host `${env.NAGIOS_HOSTSTATE}` alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!
 
 %elif env.TARGET_TYPE == 'service':
 
 ## $NOTIFICATIONTYPE - $HOSTDISPLAYNAME - $SERVICEDISPLAYNAME is $SERVICESTATE
-${env.NAGIOS_NOTIFICATIONTYPE} - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDESC} is ${env.NAGIOS_SERVICESTATE}
+`${env.NAGIOS_NOTIFICATIONTYPE}` - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDESC} is `${env.NAGIOS_SERVICESTATE}`
 
 %endif
 </%def>
@@ -56,8 +56,8 @@ ${env.NAGIOS_NOTIFICATIONTYPE} - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDES
 %if env.TARGET_TYPE == 'host':
     %if notify_type == 'sms':
 
-    ## "$NOTIFICATIONTYPE$: Host $HOSTSTATE$ alert for $HOSTNAME$($_HOSTLOC$: $_HOSTWANIP$)!"
-    ${short_alert(env, short_env)}
+## "$NOTIFICATIONTYPE$: Host $HOSTSTATE$ alert for $HOSTNAME$($_HOSTLOC$: $_HOSTWANIP$)!"
+${short_env.type}: ${short_env.host} ${short_env.hoststate}, ${short_env.time}, ${short_env.extra}, ${short_env.link}
 
     %elif notify_type == 'email':
 
@@ -92,8 +92,8 @@ Comment: [${env.NOTIFICATIONAUTHORNAME}] ${env.NOTIFICATIONCOMMENT}
 %elif env.TARGET_TYPE == 'service':
     %if notify_type == 'sms':
 
-    ## "$NOTIFICATIONTYPE$: $HOSTALIAS$/$SERVICEDESC$ is $SERVICESTATE$: $SERVICEOUTPUT$ $LONGSERVICEOUTPUT$"
-    ${short_alert(env, short_env)}
+## "$NOTIFICATIONTYPE$: $HOSTALIAS$/$SERVICEDESC$ is $SERVICESTATE$: $SERVICEOUTPUT$ $LONGSERVICEOUTPUT$"
+${short_env.type}: ${short_env.host}/${short_env.service}, ${short_env.time}, ${short_env.extra}, ${short_env.link}
 
     %elif notify_type == 'email':
 
@@ -147,13 +147,23 @@ QuickReboot: ${reboot_host_link}
 <%def name="markdown_content(env, notify_type)" >
 %if env.TARGET_TYPE == 'host':
 
-Notification Type: ${env.NAGIOS_NOTIFICATIONTYPE}
+**${env.NAGIOS_NOTIFICATIONTYPE}**
 Host: ${env.NAGIOS_HOSTALIAS}
 Duration: ${env.NAGIOS_HOSTDURATION}
 Date/Time: ${env.NAGIOS_LONGDATETIME}
 Additional Info:
+%if notify_type == 'wework':
+> ${env.NAGIOS_HOSTOUTPUT}
+> ${env.NAGIOS_LONGHOSTOUTPUT}
+%elif notify_type == 'telegram'
+```
 ${env.NAGIOS_HOSTOUTPUT}
 ${env.NAGIOS_LONGHOSTOUTPUT}
+```
+%else
+${env.NAGIOS_HOSTOUTPUT}
+${env.NAGIOS_LONGHOSTOUTPUT}
+%endif
         %if env.NOTIFICATIONAUTHORNAME:
 Comment: [${env.NOTIFICATIONAUTHORNAME}] ${env.NOTIFICATIONCOMMENT}
         %endif
@@ -164,8 +174,18 @@ ${short_env.time}
 ${'Duration: %s' % env.NAGIOS_SERVICEDURATION if env.SERVICE_DURATION_SEC and float(env.SERVICE_DURATION_SEC) > 1 else ''}
 ${'Contacts: %s' % env.NAGIOS__SERVICECONTACT if env.NAGIOS__SERVICECONTACT else ''}
 Additional Info:
+%if notify_type == 'wework':
+> ${env.NAGIOS_SERVICEOUTPUT}
+> ${env.NAGIOS_LONGSERVICEOUTPUT}
+%elif notify_type == 'telegram'
+```
 ${env.NAGIOS_SERVICEOUTPUT}
 ${env.NAGIOS_LONGSERVICEOUTPUT}
+```
+%else
+${env.NAGIOS_SERVICEOUTPUT}
+${env.NAGIOS_LONGSERVICEOUTPUT}
+%endif
         %if env.NOTIFICATIONAUTHORNAME:
 Comment: [${env.NOTIFICATIONAUTHORNAME}] ${env.NOTIFICATIONCOMMENT}
         %endif
@@ -173,25 +193,15 @@ Comment: [${env.NOTIFICATIONAUTHORNAME}] ${env.NOTIFICATIONCOMMENT}
 %endif
 
 %if short_env.custom_wiki_url:
-Wiki: ${short_env.custom_wiki_url}
+[Wiki](${short_env.custom_wiki_url})
 %elif short_env.wiki_base_url and short_env.service:
-Wiki: ${short_env.wiki_base_url}/${short_env.service}
+[Wiki](${short_env.wiki_base_url}/${short_env.service})
 %endif
 
 %if ack_link:
-Acknowledge: ${ack_link}
+[Acknowledge](${ack_link})
 %endif
 %if reboot_host_link:
-QuickReboot: ${reboot_host_link}
-%endif
-</%def>
-
-
-
-<%def name="short_alert(env, short_env)" >
-%if env.TARGET_TYPE == 'host':
-${short_env.type}: ${short_env.host} ${short_env.hoststate}, ${short_env.time}, ${short_env.extra}, ${short_env.link}
-%elif env.TARGET_TYPE == 'service':
-${short_env.type}: ${short_env.host}/${short_env.service}, ${short_env.time}, ${short_env.extra}, ${short_env.link}
+[QuickReboot](${reboot_host_link})
 %endif
 </%def>
