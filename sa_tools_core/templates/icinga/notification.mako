@@ -7,45 +7,53 @@
     %if notify_type in ('email', 'pushover', 'sms', 'pushbullet'):
         ${plain_content(env, notify_type)}
     %elif notify_type in ('telegram', 'wework'):
-        ${markdown_title(env, notify_type)}
+        ${title(env, notify_type)}
         |
         ${markdown_content(env, notify_type)}
     %else
-        ${plain_title(env, notify_type)}
+        ${title(env, notify_type)}
         |
         ${plain_content(env, notify_type)}
     %endif
 %endif
 
 
-<%def name="plain_title(env, notify_type)" >
+<%def name="title(env, notify_type)" >
 <%
     archive_hint = '[ICINGA ARCHIVE] ' if env.NOTIFICATION_IS_ARCHIVE else ''
 %>
 %if env.TARGET_TYPE == 'host':
-
-## ${archive_hint}${env.NOTIFICATIONTYPE - $HOSTDISPLAYNAME is $HOSTSTATE
-${archive_hint}Host ${env.NAGIOS_HOSTSTATE} alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!
-
-%elif env.TARGET_TYPE == 'service':
-
-## ${archive_hint}$NOTIFICATIONTYPE - $HOSTDISPLAYNAME - $SERVICEDISPLAYNAME is $SERVICESTATE
-${archive_hint}${env.NAGIOS_NOTIFICATIONTYPE} - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDESC} is ${env.NAGIOS_SERVICESTATE}
-
-%endif
-</%def>
-
-
-<%def name="markdown_title(env, notify_type)" >
-%if env.TARGET_TYPE == 'host':
-
 ## ${env.NOTIFICATIONTYPE - $HOSTDISPLAYNAME is $HOSTSTATE
+    %if notify_type == 'wework':
+        %if env.NAGIOS_NOTIFICATIONTYPE == 'RECOVERY':
+<font color="info">Host ${env.NAGIOS_HOSTSTATE} alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!</font>
+        %elif env.NAGIOS_NOTIFICATIONTYPE == 'PROBLEM':
+Host <font color="warning">${env.NAGIOS_HOSTSTATE}< alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!/font>
+        %else
+Host <font color="comment">${env.NAGIOS_HOSTSTATE}< alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!/font>
+        %endif
+    %elif notify_type == 'telegram'
 Host `${env.NAGIOS_HOSTSTATE}` alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!
+    %else
+${archive_hint}Host ${env.NAGIOS_HOSTSTATE} alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!
+    %endif
 
 %elif env.TARGET_TYPE == 'service':
 
 ## $NOTIFICATIONTYPE - $HOSTDISPLAYNAME - $SERVICEDISPLAYNAME is $SERVICESTATE
+    %if notify_type == 'wework':
+        %if env.NAGIOS_NOTIFICATIONTYPE == 'RECOVERY':
+<font color="info">${env.NAGIOS_NOTIFICATIONTYPE} - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDESC} is ${env.NAGIOS_SERVICESTATE}</font>
+        %elif env.NAGIOS_NOTIFICATIONTYPE == 'PROBLEM':
+<font color="warning">${env.NAGIOS_NOTIFICATIONTYPE} - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDESC} is ${env.NAGIOS_SERVICESTATE}</font>
+        %else:
+<font color="comment">${env.NAGIOS_NOTIFICATIONTYPE} - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDESC} is ${env.NAGIOS_SERVICESTATE}</font>
+        %endif
+    %elif notify_type == 'telegram'
 `${env.NAGIOS_NOTIFICATIONTYPE}` - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDESC} is `${env.NAGIOS_SERVICESTATE}`
+    %else
+${archive_hint}${env.NAGIOS_NOTIFICATIONTYPE} - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDESC} is ${env.NAGIOS_SERVICESTATE}
+    %endif
 
 %endif
 </%def>

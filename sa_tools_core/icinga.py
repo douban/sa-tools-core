@@ -80,7 +80,7 @@ def notify(args):
             NOTIFICATION_IS_ARCHIVE=False,
             NAGIOS_CONTACTNAME="shuaisa",
             SERVICE_DURATION_SEC="5.001102",
-            NAGIOS_CUSTOM_WIKI="",
+            NAGIOS_CUSTOM_WIKI="https://wiki.example.com/servcie/fakeservice",
         )
         if args.test
         else os.environ
