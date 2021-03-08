@@ -73,7 +73,7 @@ class Notifier(object):
 
     def _telegram(self, addrs, content=None, **kw):
         for addr in addrs:
-            send_telegram(addr, content, markdown=bool(self.msg_type == "markdown"))
+            send_telegram(addr, content, msg_type=self.msg_type)
 
     def _sms(self, addrs, content=None, **kw):
         for addr in addrs:
