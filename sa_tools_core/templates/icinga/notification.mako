@@ -10,7 +10,7 @@
         ${title(env, notify_type)}
         |
         ${markdown_content(env, notify_type)}
-    %else
+    %else:
         ${title(env, notify_type)}
         |
         ${plain_content(env, notify_type)}
@@ -29,12 +29,12 @@
 <font color="info">Host ${env.NAGIOS_HOSTSTATE} alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!</font>
         %elif env.NAGIOS_NOTIFICATIONTYPE == 'PROBLEM':
 Host <font color="warning">${env.NAGIOS_HOSTSTATE}< alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!/font>
-        %else
+        %else:
 Host <font color="comment">${env.NAGIOS_HOSTSTATE}< alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!/font>
         %endif
-    %elif notify_type == 'telegram'
+    %elif notify_type == 'telegram':
 Host `${env.NAGIOS_HOSTSTATE}` alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!
-    %else
+    %else:
 ${archive_hint}Host ${env.NAGIOS_HOSTSTATE} alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!
     %endif
 
@@ -49,9 +49,9 @@ ${archive_hint}Host ${env.NAGIOS_HOSTSTATE} alert for ${env.NAGIOS_HOSTNAME}(${e
         %else:
 <font color="comment">${env.NAGIOS_NOTIFICATIONTYPE} - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDESC} is ${env.NAGIOS_SERVICESTATE}</font>
         %endif
-    %elif notify_type == 'telegram'
+    %elif notify_type == 'telegram':
 `${env.NAGIOS_NOTIFICATIONTYPE}` - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDESC} is `${env.NAGIOS_SERVICESTATE}`
-    %else
+    %else:
 ${archive_hint}${env.NAGIOS_NOTIFICATIONTYPE} - ${env.NAGIOS_HOSTALIAS}/${env.NAGIOS_SERVICEDESC} is ${env.NAGIOS_SERVICESTATE}
     %endif
 
@@ -163,12 +163,13 @@ Additional Info:
 %if notify_type == 'wework':
 > ${env.NAGIOS_HOSTOUTPUT}
 > ${env.NAGIOS_LONGHOSTOUTPUT}
-%elif notify_type == 'telegram'
+
+%elif notify_type == 'telegram':
 ```
 ${env.NAGIOS_HOSTOUTPUT}
 ${env.NAGIOS_LONGHOSTOUTPUT}
 ```
-%else
+%else:
 ${env.NAGIOS_HOSTOUTPUT}
 ${env.NAGIOS_LONGHOSTOUTPUT}
 %endif
@@ -183,14 +184,19 @@ ${'Duration: %s' % env.NAGIOS_SERVICEDURATION if env.SERVICE_DURATION_SEC and fl
 ${'Contacts: %s' % env.NAGIOS__SERVICECONTACT if env.NAGIOS__SERVICECONTACT else ''}
 Additional Info:
 %if notify_type == 'wework':
+%if env.NAGIOS_SERVICEOUTPUT:
 > ${env.NAGIOS_SERVICEOUTPUT}
+%endif
+%if env.NAGIOS_LONGSERVICEOUTPUT:
 > ${env.NAGIOS_LONGSERVICEOUTPUT}
-%elif notify_type == 'telegram'
+%endif
+|
+%elif notify_type == 'telegram':
 ```
 ${env.NAGIOS_SERVICEOUTPUT}
 ${env.NAGIOS_LONGSERVICEOUTPUT}
 ```
-%else
+%else:
 ${env.NAGIOS_SERVICEOUTPUT}
 ${env.NAGIOS_LONGSERVICEOUTPUT}
 %endif

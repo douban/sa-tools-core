@@ -65,7 +65,7 @@ def ack(args):
 @send_sentry
 @require_user
 def notify(args):
-    notifier = Notifier(from_addr=ICINGA_EMAIL)
+    notifier = Notifier(from_addr=ICINGA_EMAIL, msg_type="markdown")
     env = (
         dict(
             TARGET_TYPE="service",
@@ -80,7 +80,7 @@ def notify(args):
             NOTIFICATION_IS_ARCHIVE=False,
             NAGIOS_CONTACTNAME="shuaisa",
             SERVICE_DURATION_SEC="5.001102",
-            NAGIOS_CUSTOM_WIKI="https://wiki.example.com/servcie/fakeservice",
+            NAGIOS_CUSTOM_WIKI="https://wiki.example.com/service/fakeservice",
         )
         if args.test
         else os.environ
