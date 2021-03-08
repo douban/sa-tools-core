@@ -18,7 +18,7 @@ def send_message(chatid, content, msg_type="text"):
         "text": content,
     }
     if msg_type == "markdown":
-        message["parse_mode"] = "MarkdownV2"
+        message["parse_mode"] = "Markdown"
     elif msg_type == "html":
         message["parse_mode"] = "HTML"
 
