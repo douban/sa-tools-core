@@ -28,9 +28,9 @@
         %if env.NAGIOS_NOTIFICATIONTYPE == 'RECOVERY':
 <font color="info">Host ${env.NAGIOS_HOSTSTATE} alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!</font>
         %elif env.NAGIOS_NOTIFICATIONTYPE == 'PROBLEM':
-Host <font color="warning">${env.NAGIOS_HOSTSTATE}< alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!/font>
+<font color="warning">Host ${env.NAGIOS_HOSTSTATE} alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!</font>
         %else:
-Host <font color="comment">${env.NAGIOS_HOSTSTATE}< alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!/font>
+<font color="comment">Host ${env.NAGIOS_HOSTSTATE} alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!/font>
         %endif
     %elif notify_type == 'telegram':
 Host `${env.NAGIOS_HOSTSTATE}` alert for ${env.NAGIOS_HOSTNAME}(${env.NAGIOS__HOSTLOC}: ${env.NAGIOS__HOSTWANIP})!
@@ -206,16 +206,15 @@ Comment: [${env.NOTIFICATIONAUTHORNAME}] ${env.NOTIFICATIONCOMMENT}
 
 %endif
 
-%if short_env.custom_wiki_url:
-[Wiki](${short_env.custom_wiki_url})
-%elif short_env.wiki_base_url and short_env.service:
-[Wiki](${short_env.wiki_base_url}/${short_env.service})
-%endif
+${wiki_link(short_env)}\
+${' | [Acknowledge](%s)' % ack_link if ack_link else ''}\
+${' | [QuickReboot](%s)' % reboot_host_link if reboot_host_link else ''}
+</%def>
 
-%if ack_link:
-[Acknowledge](${ack_link})
-%endif
-%if reboot_host_link:
-[QuickReboot](${reboot_host_link})
+<%def name="wiki_link(short_env)" >
+%if short_env.custom_wiki_url:
+[Wiki](${short_env.custom_wiki_url})\
+%elif short_env.wiki_base_url and short_env.service:
+[Wiki](${short_env.wiki_base_url}/${short_env.service})\
 %endif
 </%def>
