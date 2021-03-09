@@ -160,22 +160,27 @@ Host: ${env.NAGIOS_HOSTALIAS}
 Duration: ${env.NAGIOS_HOSTDURATION}
 Date/Time: ${env.NAGIOS_LONGDATETIME}
 Additional Info:
-%if notify_type == 'wework':
+    %if notify_type == 'wework':
+        %if env.NAGIOS_HOSTOUTPUT:
 > ${env.NAGIOS_HOSTOUTPUT}
-> ${env.NAGIOS_LONGHOSTOUTPUT}
-
-%elif notify_type == 'telegram':
-```
-${env.NAGIOS_HOSTOUTPUT}
-${env.NAGIOS_LONGHOSTOUTPUT}
-```
-%else:
-${env.NAGIOS_HOSTOUTPUT}
-${env.NAGIOS_LONGHOSTOUTPUT}
-%endif
-        %if env.NOTIFICATIONAUTHORNAME:
-Comment: [${env.NOTIFICATIONAUTHORNAME}] ${env.NOTIFICATIONCOMMENT}
         %endif
+        %if env.NAGIOS_LONGHOSTOUTPUT:
+> ${env.NAGIOS_LONGHOSTOUTPUT}
+        %endif
+|
+    %elif notify_type == 'telegram':
+```
+${env.NAGIOS_HOSTOUTPUT}
+${env.NAGIOS_LONGHOSTOUTPUT}
+```
+    %else:
+${env.NAGIOS_HOSTOUTPUT}
+${env.NAGIOS_LONGHOSTOUTPUT}
+    %endif
+
+    %if env.NOTIFICATIONAUTHORNAME:
+Comment: [${env.NOTIFICATIONAUTHORNAME}] ${env.NOTIFICATIONCOMMENT}
+    %endif
 
 %elif env.TARGET_TYPE == 'service':
 
@@ -183,26 +188,27 @@ ${short_env.time}
 ${'Duration: %s' % env.NAGIOS_SERVICEDURATION if env.SERVICE_DURATION_SEC and float(env.SERVICE_DURATION_SEC) > 1 else ''}
 ${'Contacts: %s' % env.NAGIOS__SERVICECONTACT if env.NAGIOS__SERVICECONTACT else ''}
 Additional Info:
-%if notify_type == 'wework':
-%if env.NAGIOS_SERVICEOUTPUT:
+    %if notify_type == 'wework':
+        %if env.NAGIOS_SERVICEOUTPUT:
 > ${env.NAGIOS_SERVICEOUTPUT}
-%endif
-%if env.NAGIOS_LONGSERVICEOUTPUT:
-> ${env.NAGIOS_LONGSERVICEOUTPUT}
-%endif
-|
-%elif notify_type == 'telegram':
-```
-${env.NAGIOS_SERVICEOUTPUT}
-${env.NAGIOS_LONGSERVICEOUTPUT}
-```
-%else:
-${env.NAGIOS_SERVICEOUTPUT}
-${env.NAGIOS_LONGSERVICEOUTPUT}
-%endif
-        %if env.NOTIFICATIONAUTHORNAME:
-Comment: [${env.NOTIFICATIONAUTHORNAME}] ${env.NOTIFICATIONCOMMENT}
         %endif
+        %if env.NAGIOS_LONGSERVICEOUTPUT:
+> ${env.NAGIOS_LONGSERVICEOUTPUT}
+        %endif
+|
+    %elif notify_type == 'telegram':
+```
+${env.NAGIOS_SERVICEOUTPUT}
+${env.NAGIOS_LONGSERVICEOUTPUT}
+```
+    %else:
+${env.NAGIOS_SERVICEOUTPUT}
+${env.NAGIOS_LONGSERVICEOUTPUT}
+    %endif
+
+    %if env.NOTIFICATIONAUTHORNAME:
+Comment: [${env.NOTIFICATIONAUTHORNAME}] ${env.NOTIFICATIONCOMMENT}
+    %endif
 
 %endif
 
