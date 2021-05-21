@@ -26,6 +26,7 @@ COMMON_PARAM_TYPES = {
     'str': str,
     'int': int,
     'bool': bool,
+    'int non-negative': int,
 }
 
 
