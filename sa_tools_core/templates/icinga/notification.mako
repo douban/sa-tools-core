@@ -2,7 +2,7 @@
 ## TODO: use include mako page
 
 %if fragment_type == 'title':
-    ${plain_content(env, notify_type)}
+    ${title(env, notify_type)}
 %elif fragment_type == 'content':
     %if notify_type in ('email', 'pushover', 'sms', 'pushbullet'):
         ${plain_content(env, notify_type)}
