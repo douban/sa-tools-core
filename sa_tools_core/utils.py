@@ -5,7 +5,6 @@ from __future__ import print_function
 import os
 import sys
 import six
-import pwd
 import socket
 import binascii
 import importlib
@@ -20,7 +19,7 @@ ip_hostname_cache = {}
 
 
 def get_os_username():
-    return pwd.getpwuid(os.getuid()).pw_name
+    return os.getlogin()
 
 
 def get_config(config_name):
