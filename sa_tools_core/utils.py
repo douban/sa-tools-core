@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import os
+import getpass
 import sys
 import six
 import socket
@@ -19,7 +20,7 @@ ip_hostname_cache = {}
 
 
 def get_os_username():
-    return os.getlogin()
+    return getpass.getuser()
 
 
 def get_config(config_name):
