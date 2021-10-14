@@ -8,9 +8,11 @@ version = '0.4.4'
 requirements = [
     'setuptools',
     'six>=1.12.0',
+    'sentry-sdk',
 
     # sa-notify
     'wechatpy',
+    'pylark',
     'requests',
 
     # sa-dns
@@ -34,7 +36,6 @@ extras_require = {
     ],
     # sa-icinga
     'icinga': [
-        'sentry-sdk',
         'Mako',
         'icinga2py',
         'inflect',
