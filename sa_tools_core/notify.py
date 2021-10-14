@@ -9,6 +9,7 @@ from sa_tools_core.libs.sentry import report
 from sa_tools_core.libs.permission import require_user
 from sa_tools_core.libs.notify.email import send_mail
 from sa_tools_core.libs.notify.wework import send_message as send_wework
+from sa_tools_core.libs.notify.lark import send_message as send_lark
 from sa_tools_core.libs.notify.pushbullet import send_message as send_pushbullet
 from sa_tools_core.libs.notify.pushover import send_message as send_pushover
 from sa_tools_core.libs.notify.telegram import send_message as send_telegram
@@ -19,7 +20,7 @@ from sa_tools_core.consts import SYSADMIN_EMAIL
 logger = logging.getLogger(__name__)
 logging.getLogger("requests").setLevel(logging.WARN)
 
-NOTIFY_TYPES = ("wework", "email", "sms", "pushbullet", "pushover", "telegram")
+NOTIFY_TYPES = ("wework", "lark", "email", "sms", "pushbullet", "pushover", "telegram")
 DEFAULT_TITLE = "Sent from sa-notify"
 DEFAULT_MSG_TYPE = "text"
 
@@ -59,6 +60,9 @@ class Notifier(object):
 
     def _wework(self, addrs, content=None, **kw):
         send_wework(addrs, content, msg_type=self.msg_type)
+
+    def _lark(self, addrs, content=None, **kw):
+        send_lark(addrs, content)
 
     def _email(self, addrs, content=None, title=None, from_addr=None, **kw):
         send_mail(addrs, content, subject=title, from_addr=from_addr or self.from_addr)
