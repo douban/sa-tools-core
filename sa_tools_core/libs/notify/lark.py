@@ -49,7 +49,7 @@ def send_message(addrs, content, **kwargs):
     #    }
     # }
     lark_bundle = LarkApp.load_from_configs(configs=json.loads(secret))
-    company = kwargs.get("company", DEFAULT_LARK_TENANT)
+    company = kwargs.get("company", DEFAULT_LARK_TENANT) or DEFAULT_LARK_TENANT
     lark = lark_bundle.get_lark(company=company)
     for addr in addrs:
         res, response = lark.message.send_raw_message(
