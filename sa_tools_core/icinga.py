@@ -147,7 +147,7 @@ def notify(args):
                 ok = True
             if ok:
                 try:
-                    getattr(notifier, type_)(addrs, title=title, content=content)
+                    getattr(notifier, type_)(addrs, title=title, content=content, company=args.company)
                 except Exception as e:
                     report()
                     logger.error("Notifier.%s(%s) failed: %s", type_, addrs, e)
@@ -186,6 +186,7 @@ def main():
 
     notify_parser = subparsers.add_parser("notify", help="Notify.")
     notify_parser.add_argument("--test", action="store_true", help="test")
+    notify_parser.add_argument("--company", help="Company that this user is in, will be passed to notify function")
     for type_ in NOTIFY_TYPES:
         notify_parser.add_argument(
             "--%s" % type_, nargs="*", help="your enterprise address of %s." % type_
