@@ -99,7 +99,10 @@ def notify(args):
         if values:
             addrs = [i for v in values for i in re.split(r"[,\s]+", v)]
             try:
-                getattr(notifier, type_)(addrs, from_addr=args.from_addr, company=args.company)
+                if args.company:
+                    getattr(notifier, type_)(addrs, from_addr=args.from_addr, company=args.company)
+                else:
+                    getattr(notifier, type_)(addrs, from_addr=args.from_addr)
             except Exception as e:
                 logger.exception("Notifier.%s(%s) failed: %s", type_, addrs, e)
                 report()
