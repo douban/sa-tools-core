@@ -19,10 +19,6 @@ APP_SECRET = "bbbbbbbbbbbbbbbbbbbbbb"
 class LarkApp(object):
     tenants = {}
 
-    def __init__(self, lark=None, lark_ark=None):
-        self.tenants["douban"] = lark
-        self.tenants["ark"] = lark_ark
-
     @staticmethod
     def load_from_configs(configs: dict):
         app = LarkApp()
