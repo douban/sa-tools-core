@@ -59,27 +59,33 @@ class Notifier(object):
         raise AttributeError
 
     def _wework(self, addrs, content=None, **kw):
+        content = content if content is not None else self.content
         send_wework(addrs, content, msg_type=self.msg_type)
 
     def _lark(self, addrs, content=None, **kw):
         send_lark(addrs, content)
 
     def _email(self, addrs, content=None, title=None, from_addr=None, **kw):
+        content = content if content is not None else self.content
         send_mail(addrs, content, subject=title, from_addr=from_addr or self.from_addr)
 
     def _pushbullet(self, addrs, content=None, title=None, **kw):
+        content = content if content is not None else self.content
         for addr in addrs:
             send_pushbullet(addr, title, content)
 
     def _pushover(self, addrs, content=None, **kw):
+        content = content if content is not None else self.content
         for addr in addrs:
             send_pushover(addr, content)
 
     def _telegram(self, addrs, content=None, **kw):
+        content = content if content is not None else self.content
         for addr in addrs:
             send_telegram(addr, content, msg_type=self.msg_type)
 
     def _sms(self, addrs, content=None, **kw):
+        content = content if content is not None else self.content
         for addr in addrs:
             send_sms(addr, content)
 
