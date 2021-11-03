@@ -43,6 +43,8 @@ PROXIES = {
     "https": "http://gfw:2333",
 }
 
+DEFAULT_LARK_TENANT = "your_company"
+
 ########################
 # # Elasticsearch
 ########################

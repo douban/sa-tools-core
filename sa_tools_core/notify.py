@@ -63,7 +63,7 @@ class Notifier(object):
         send_wework(addrs, content, msg_type=self.msg_type)
 
     def _lark(self, addrs, content=None, **kw):
-        send_lark(addrs, content)
+        send_lark(addrs, content, **kw)
 
     def _email(self, addrs, content=None, title=None, from_addr=None, **kw):
         content = content if content is not None else self.content
@@ -99,7 +99,7 @@ def notify(args):
         if values:
             addrs = [i for v in values for i in re.split(r"[,\s]+", v)]
             try:
-                getattr(notifier, type_)(addrs, from_addr=args.from_addr)
+                getattr(notifier, type_)(addrs, from_addr=args.from_addr, company=args.company)
             except Exception as e:
                 logger.exception("Notifier.%s(%s) failed: %s", type_, addrs, e)
                 report()
@@ -120,6 +120,7 @@ def main(args=None):
         "-s", "--subject", help='subject. default="%(default)s"', default=DEFAULT_TITLE
     )
     parser.add_argument("-f", "--from-addr", help="From address, currently only works for email.")
+    parser.add_argument("--company", help="Company user in, used when multiple company or tenant is configured.")
     for type_ in NOTIFY_TYPES:
         parser.add_argument(
             "--%s" % type_, nargs="*", help="your enterprise address of %s." % type_

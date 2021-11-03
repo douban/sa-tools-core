@@ -17,3 +17,5 @@ local_config.py
 /build
 
 .vscode/
+
+secrets

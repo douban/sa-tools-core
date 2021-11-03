@@ -35,3 +35,5 @@ PROXIES = {
 # can be a string pattern which contains {cb_token}
 DNS_MONITOR_CALLBACK_URL = 'http://example.com/api/callback/dnsmonitor/{cb_token}'
 DEFAULT_DNS_DOMAIN = 'example.com'
+
+DEFAULT_LARK_TENANT = "your_company"
