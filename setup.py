@@ -3,7 +3,7 @@
 from io import open
 from setuptools import setup, find_packages
 
-version = '0.6.0'
+version = '0.7.0'
 
 requirements = [
     'setuptools',

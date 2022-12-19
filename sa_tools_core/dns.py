@@ -181,9 +181,11 @@ class DNSPod(object):
 
     def add_or_modify_record(self, sub_domain, type, value, ttl=DEFAULT_TTL, mx=DEFAULT_MX,
                              line=DEFAULT_LINE,
-                             force_enable=None):
+                             force_enable=None,
+                             force_add=False):
         """
         - add or modify 一个 记录
+            - force_add 为真, 则直接增加一条记录
             - 若存在，则 modify
                 - 若没差，则直接返回
                 - 若有差，
@@ -206,10 +208,14 @@ class DNSPod(object):
 
         records = self.get_records(sub_domain=sub_domain)
         # NOTE: only deal with default line type records by default
-        exist_records = [r for r in records
-                         if to_str(r['line']) == line
-                         and r['type'] == type
-                         and r['value'].rstrip('.') == value.rstrip('.')]
+        if force_add:
+            # 
+            exist_records = []
+        else:
+            exist_records = [r for r in records
+                                if to_str(r['line']) == line
+                                and r['type'] == type
+                                and r['value'].rstrip('.') == value.rstrip('.')]
 
         if self.verbose:
             logger.info('add_or_modify_record({sub_domain}, {type}, {value}, ttl={ttl}, '
@@ -543,7 +549,8 @@ def ensure(args):
         sub_domain_records, msg = dnspod.add_or_modify_record(sub_domain, args.type, value,
                                                               ttl=args.ttl, mx=args.mx,
                                                               line=args.line,
-                                                              force_enable=args.enable)
+                                                              force_enable=args.enable,
+                                                              force_add=args.force_add)
         if msg:
             logger.error('ensure sub-domain {sub_domain} failed: {msg}'
                          .format(sub_domain=sub_domain, msg=msg))
@@ -651,6 +658,7 @@ def main(args=None):
     ensure_parser.add_argument('--excl', '--exclusive', action='store_true',
                                help='Exclusive, disable other records with the same type.')
     ensure_parser.add_argument('--dry-run', action='store_true', help='Dry run.')
+    ensure_parser.add_argument('--force-add', action='store_true', help='Force add a record, ignoring existing record')
     ensure_parser.set_defaults(func=ensure)
     ensure_parser.set_defaults(parser_name='ensure')
 
