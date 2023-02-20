@@ -6,6 +6,7 @@ import json
 import logging
 import argparse
 from six.moves.configparser import ConfigParser
+import re
 
 from pydnspod import pydnspod
 
@@ -58,11 +59,20 @@ def get_api_token_by_domain(domain):
     return result[domain] if domain in result else result['*']
 
 
+def get_top_domain(domain: str) -> str:
+    """从域名中提取顶级域名"""
+    domain_parts = domain.split(".")
+    if len(domain_parts) < 2:
+        raise ValueError("Invalid domain %s: cannot extract top domain from it as it only contain one part", domain)
+    return ".".join(domain_parts[-2:])
+
+
 class DNSPod(object):
     """manipulate the domain served by dnspod"""
     def __init__(self, login_email="", login_password="",
                  api_token_or_func=get_api_token_by_domain,
                  domain=DOMAIN,
+                 domain_suffix=None,
                  dry_run=False,
                  verbose=True):
         self.email = login_email
@@ -72,8 +82,9 @@ class DNSPod(object):
         self.verbose = verbose
         self._dns_monitor_cb_key = None
 
-        self.domain_str = domain
-        domain_dict = json.loads(self.domain.info(domain=domain))['domain']
+        self.domain_suffix = domain_suffix or domain
+        self.top_domain = get_top_domain(self.domain_suffix)
+        domain_dict = json.loads(self.domain.info(domain=self.top_domain))['domain']
         self.domain_id = domain_dict['id']
         self.domain_grade = domain_dict['grade']
         self.domain_grade_title = domain_dict['grade_title']
@@ -144,6 +155,13 @@ class DNSPod(object):
         # FIXME: https://www.dnspod.cn/docs/records.html#record-list, iter to get all
         records = json.loads(self.record.list(domain_id=self.domain_id, length=MAX_RECORDS_COUNT, **kw)).get('records', [])
         return records
+
+    def parse_subdomain(self, sub_domain: str) -> str:
+        """parse sub_domain to get the real sub_domain"""
+        full_domain = ".".join([sub_domain, self.domain_suffix])
+        if full_domain.endswith(self.top_domain):
+            return re.sub(f"{self.top_domain}$", "", full_domain).rstrip(".")
+        raise ValueError("Invalid sub_domain %s: it is not a sub domain of %s", sub_domain, self.domain_suffix)
 
     def remove_records(self, sub_domain, type=None, value=None, line=DEFAULT_LINE):
         """remove all records of the sub_domain, type, value"""
@@ -365,7 +383,7 @@ class DNSPod(object):
             'domain_id': self.domain_id,
             'port': port,
             'monitor_interval': monitor_interval,
-            'host': '{}.{}'.format(sub_domain, self.domain_str),
+            'host': '{}.{}'.format(sub_domain, self.domain_suffix),
             'monitor_type': monitor_schema_type,
             'monitor_path': monitor_uri_path,
             'points': points,
@@ -399,7 +417,10 @@ class DNSPod(object):
 
 
 def parse_sub_domains(sub_domains, top_level_domain):
-    domain_group_prefix = '' if top_level_domain == DOMAIN else top_level_domain + ':'
+    if top_level_domain == DOMAIN:
+        domain_group_prefix = ''
+    else:
+        domain_group_prefix = top_level_domain + ':'
 
     sub_domains = sub_domains.split(',')
     sub_domains = [s.strip() for s in sub_domains if s.strip()]
@@ -544,6 +565,7 @@ def ensure(args):
 
     records = []
     for sub_domain in sub_domains:
+        sub_domain = dnspod.parse_subdomain(sub_domain)
         full_domain = sub_domain.rstrip('.') + '.' + DOMAIN
         value = args.value.format(domain=full_domain, sub_domain=sub_domain, type=args.type)
         sub_domain_records, msg = dnspod.add_or_modify_record(sub_domain, args.type, value,
